@@ -12,6 +12,7 @@
 		3D7B56862C38B63400D7FFDD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D7B56852C38B63400D7FFDD /* Assets.xcassets */; };
 		3D7B56892C38B63400D7FFDD /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D7B56882C38B63400D7FFDD /* Preview Assets.xcassets */; };
 		3D7B56902C391A9400D7FFDD /* HealthDataListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B568F2C391A9400D7FFDD /* HealthDataListView.swift */; };
+		3D7B56922C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B56912C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		3D7B56852C38B63400D7FFDD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3D7B56882C38B63400D7FFDD /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3D7B568F2C391A9400D7FFDD /* HealthDataListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDataListView.swift; sourceTree = "<group>"; };
+		3D7B56912C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitPermissionPrimingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +58,7 @@
 				3D7B56812C38B63200D7FFDD /* Sound_CheckApp.swift */,
 				3D7B56832C38B63200D7FFDD /* DashboardView.swift */,
 				3D7B568F2C391A9400D7FFDD /* HealthDataListView.swift */,
+				3D7B56912C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift */,
 				3D7B56852C38B63400D7FFDD /* Assets.xcassets */,
 				3D7B56872C38B63400D7FFDD /* Preview Content */,
 			);
@@ -143,6 +146,7 @@
 				3D7B56902C391A9400D7FFDD /* HealthDataListView.swift in Sources */,
 				3D7B56842C38B63200D7FFDD /* DashboardView.swift in Sources */,
 				3D7B56822C38B63200D7FFDD /* Sound_CheckApp.swift in Sources */,
+				3D7B56922C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

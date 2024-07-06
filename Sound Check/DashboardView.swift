@@ -17,7 +17,6 @@ enum HealthMetricContext: CaseIterable, Identifiable {
                 return "Sound Levels"
             case .headphones:
                 return "Headphones"
-
         }
     }
 }
@@ -31,14 +30,12 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-
                     Picker("Selected Stat", selection: $selectedStat) {
                         ForEach(HealthMetricContext.allCases) {
                             Text($0.title)
                         }
                     }
                     .pickerStyle(.segmented)
-
                     VStack {
                         NavigationLink(value: selectedStat) {
                             HStack {
@@ -50,9 +47,7 @@ struct DashboardView: View {
                                     Text("Avg: Sound")
                                         .font(.caption)
                                 }
-
                                 Spacer()
-
                                 Image(systemName: "chevron.right")
                             }
                         }

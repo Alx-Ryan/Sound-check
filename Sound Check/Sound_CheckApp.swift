@@ -11,7 +11,7 @@ import SwiftUI
 struct Sound_CheckApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DashboardView()
         }
     }
 }

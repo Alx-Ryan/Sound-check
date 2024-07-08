@@ -1,20 +1,20 @@
-//
-//  HealthDataListView.swift
-//  Sound Check
-//
-//  Created by Alex Ryan on 7/6/24.
-//
+    //
+    //  HealthDataListView.swift
+    //  Sound Check
+    //
+    //  Created by Alex Ryan on 7/6/24.
+    //
 
 import SwiftUI
 
 struct HealthDataListView: View {
-
+    
     @State private var isShowingAddData = false
     @State private var addDataDate: Date = .now
     @State private var valueToAdd: String = ""
-
+    
     var metric: HealthMetricContext
-
+    
     var body: some View {
         List(0..<28) { i in
             HStack {
@@ -33,7 +33,7 @@ struct HealthDataListView: View {
             }
         }
     }
-
+    
     var addDataView: some View {
         NavigationStack {
             Form {
@@ -51,10 +51,10 @@ struct HealthDataListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
-                        // code later
+                            // code later
                     }
                 }
-
+                
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
                         isShowingAddData = false

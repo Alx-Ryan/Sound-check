@@ -6,6 +6,7 @@
     //
 
 import SwiftUI
+import Charts
 
 enum HealthMetricContext: CaseIterable, Identifiable {
     case soundLevels, headphones
@@ -58,9 +59,15 @@ struct DashboardView: View {
                         .foregroundStyle(.secondary)
                         .padding(.bottom, 12)
                         
-                        RoundedRectangle(cornerRadius: 12)
-                            .foregroundStyle(.secondary)
-                            .frame(height: 150)
+                        Chart {
+                            ForEach(hkManager.environmentData) { decibel in
+                                PointMark(
+                                    x: .value("Date", decibel.date, unit: .day),
+                                    y: .value("Decibels", decibel.value)
+                                )
+                            }
+                        }
+                        .frame(height: 150)
                     }
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
@@ -87,7 +94,7 @@ struct DashboardView: View {
             }
             .padding()
             .task {
-                    //await hkManager.fetchDecibelCount()
+                    await hkManager.fetchDecibelCount()
                     //await hkManager.fetchHeadphoneDecibelCount()
                 isShowingPermissionSheet = !hasSeenPermissionPriming
             }

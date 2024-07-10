@@ -14,6 +14,7 @@
 		3D7B56902C391A9400D7FFDD /* HealthDataListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B568F2C391A9400D7FFDD /* HealthDataListView.swift */; };
 		3D7B56922C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B56912C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift */; };
 		3D7B56952C39A34600D7FFDD /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B56942C39A34600D7FFDD /* HealthKitManager.swift */; };
+		3D7B56972C3B98BA00D7FFDD /* HealthMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B56962C3B98BA00D7FFDD /* HealthMetric.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		3D7B56912C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitPermissionPrimingView.swift; sourceTree = "<group>"; };
 		3D7B56932C39A19200D7FFDD /* Sound Check.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Sound Check.entitlements"; sourceTree = "<group>"; };
 		3D7B56942C39A34600D7FFDD /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		3D7B56962C3B98BA00D7FFDD /* HealthMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthMetric.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				3D7B568F2C391A9400D7FFDD /* HealthDataListView.swift */,
 				3D7B56912C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift */,
 				3D7B56942C39A34600D7FFDD /* HealthKitManager.swift */,
+				3D7B56962C3B98BA00D7FFDD /* HealthMetric.swift */,
 				3D7B56852C38B63400D7FFDD /* Assets.xcassets */,
 				3D7B56872C38B63400D7FFDD /* Preview Content */,
 			);
@@ -153,6 +156,7 @@
 				3D7B56822C38B63200D7FFDD /* Sound_CheckApp.swift in Sources */,
 				3D7B56952C39A34600D7FFDD /* HealthKitManager.swift in Sources */,
 				3D7B56922C399A3D00D7FFDD /* HealthKitPermissionPrimingView.swift in Sources */,
+				3D7B56972C3B98BA00D7FFDD /* HealthMetric.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

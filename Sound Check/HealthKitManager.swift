@@ -40,14 +40,18 @@ import Observation
             intervalComponents: .init(day: 1)
         )
 
-        let environmentLevels = try! await environmentQuery.result(for: store)
+        do {
+        let environmentLevels = try await environmentQuery.result(for: store)
 
-        let defaultDecibel = HKQuantity(unit: HKUnit.decibelAWeightedSoundPressureLevel(), doubleValue: 0.0)
+            let defaultDecibel = HKQuantity(unit: HKUnit.decibelAWeightedSoundPressureLevel(), doubleValue: 0.0)
 
-        environmentData = environmentLevels.statistics().map { stat in
-            let maxQuantity = stat.maximumQuantity() ?? defaultDecibel
-            let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
-            return HealthMetric(date: stat.startDate, value: maxValue)
+            environmentData = environmentLevels.statistics().map { stat in
+                let maxQuantity = stat.maximumQuantity() ?? defaultDecibel
+                let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
+                return HealthMetric(date: stat.startDate, value: maxValue)
+            }
+    } catch {
+
         }
     }
 
@@ -73,14 +77,18 @@ import Observation
             intervalComponents: .init(day: 1)
         )
 
-        let headphoneLevels = try! await headphoneQuery.result(for: store)
+        do {
+            let headphoneLevels = try await headphoneQuery.result(for: store)
 
-        let defaultDecibel = HKQuantity(unit: HKUnit.decibelAWeightedSoundPressureLevel(), doubleValue: 0.0)
+            let defaultDecibel = HKQuantity(unit: HKUnit.decibelAWeightedSoundPressureLevel(), doubleValue: 0.0)
 
-        headphonesData = headphoneLevels.statistics().map { stat in
-            let maxQuantity = stat.maximumQuantity() ?? defaultDecibel
-            let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
-            return HealthMetric(date: stat.startDate, value: maxValue)
+            headphonesData = headphoneLevels.statistics().map { stat in
+                let maxQuantity = stat.maximumQuantity() ?? defaultDecibel
+                let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
+                return HealthMetric(date: stat.startDate, value: maxValue)
+            }
+        } catch {
+
         }
     }
 

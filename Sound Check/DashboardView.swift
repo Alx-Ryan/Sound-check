@@ -30,7 +30,12 @@ struct DashboardView: View {
     @State private var selectedStat: HealthMetricContext = .soundLevels
     
     var isSteps: Bool { selectedStat == .soundLevels }
-    
+    var avgDecibel: Double {
+        guard !hkManager.environmentData.isEmpty else { return 0 }
+        let totalDecibels = hkManager.environmentData.reduce(0) { $0 + $1.value }
+        return totalDecibels / Double(hkManager.environmentData.count)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -49,7 +54,7 @@ struct DashboardView: View {
                                         .font(.title3.bold())
                                         .foregroundStyle(.pink)
                                     
-                                    Text("Avg: Sound")
+                                    Text("Avg: \(Double(avgDecibel)) Decibels")
                                         .font(.caption)
                                 }
                                 Spacer()
@@ -60,14 +65,36 @@ struct DashboardView: View {
                         .padding(.bottom, 12)
                         
                         Chart {
-                            ForEach(hkManager.environmentData) { decibel in
+                            RuleMark(y: .value("Average", avgDecibel))
+                                .foregroundStyle(Color.secondary)
+                                .lineStyle(.init(lineWidth: 1, dash: [5]))
+
+                            ForEach(/*hkManager.environmentData*/HealthMetric.mockData) { decibel in
                                 PointMark(
+                                    x: .value("Date", decibel.date, unit: .day),
+                                    y: .value("Decibels", decibel.value)
+                                )
+                                .foregroundStyle(Color.pink.gradient)
+                                LineMark(
                                     x: .value("Date", decibel.date, unit: .day),
                                     y: .value("Decibels", decibel.value)
                                 )
                             }
                         }
                         .frame(height: 150)
+                        .chartXAxis{
+                            AxisMarks{
+                                AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
+                            }
+                        }
+                        .chartYAxis{
+                            AxisMarks { value in
+                                AxisGridLine()
+                                    .foregroundStyle(Color.secondary.opacity(0.3))
+
+                                AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
+                            }
+                        }
                     }
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))

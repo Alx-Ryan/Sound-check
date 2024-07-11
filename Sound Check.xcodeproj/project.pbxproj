@@ -10,6 +10,7 @@
 		3D7B56822C38B63200D7FFDD /* Sound_CheckApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B56812C38B63200D7FFDD /* Sound_CheckApp.swift */; };
 		3D7B56862C38B63400D7FFDD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D7B56852C38B63400D7FFDD /* Assets.xcassets */; };
 		3D7B56892C38B63400D7FFDD /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D7B56882C38B63400D7FFDD /* Preview Assets.xcassets */; };
+		3DF6A8122C4056020075F5D4 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 3DF6A8112C4056020075F5D4 /* Algorithms */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,8 @@
 		3DF6A7F72C404D780075F5D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				ChartDataTypes.swift,
+				ChartMath.swift,
 				HealthMetric.swift,
 			);
 			target = 3D7B567D2C38B63200D7FFDD /* Sound Check */;
@@ -45,12 +48,20 @@
 			);
 			target = 3D7B567D2C38B63200D7FFDD /* Sound Check */;
 		};
+		3DF6A80F2C4051050075F5D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				DateEXT.swift,
+			);
+			target = 3D7B567D2C38B63200D7FFDD /* Sound Check */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3DF6A7F62C404D6B0075F5D4 /* Model */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3DF6A7F72C404D780075F5D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Model; sourceTree = "<group>"; };
 		3DF6A7F82C404D920075F5D4 /* Manager */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3DF6A7F92C404D990075F5D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Manager; sourceTree = "<group>"; };
 		3DF6A7FA2C404DB00075F5D4 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3DF6A8022C404DB80075F5D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+		3DF6A80B2C4050F40075F5D4 /* Extentions */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3DF6A80F2C4051050075F5D4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Extentions; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DF6A8122C4056020075F5D4 /* Algorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +100,7 @@
 				3DF6A7FA2C404DB00075F5D4 /* Views */,
 				3DF6A7F62C404D6B0075F5D4 /* Model */,
 				3DF6A7F82C404D920075F5D4 /* Manager */,
+				3DF6A80B2C4050F40075F5D4 /* Extentions */,
 				3D7B56852C38B63400D7FFDD /* Assets.xcassets */,
 				3D7B56872C38B63400D7FFDD /* Preview Content */,
 			);
@@ -118,6 +131,9 @@
 			dependencies = (
 			);
 			name = "Sound Check";
+			packageProductDependencies = (
+				3DF6A8112C4056020075F5D4 /* Algorithms */,
+			);
 			productName = "Sound Check";
 			productReference = 3D7B567E2C38B63200D7FFDD /* Sound Check.app */;
 			productType = "com.apple.product-type.application";
@@ -146,6 +162,9 @@
 				Base,
 			);
 			mainGroup = 3D7B56752C38B63200D7FFDD;
+			packageReferences = (
+				3DF6A8102C4056020075F5D4 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+			);
 			productRefGroup = 3D7B567F2C38B63200D7FFDD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -384,6 +403,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3DF6A8102C4056020075F5D4 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3DF6A8112C4056020075F5D4 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3DF6A8102C4056020075F5D4 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3D7B56762C38B63200D7FFDD /* Project object */;
 }

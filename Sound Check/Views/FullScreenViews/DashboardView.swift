@@ -67,8 +67,10 @@ struct DashboardView: View {
             }
             .padding()
             .task {
+//                await hkManager.addSimulatorData()
                     await hkManager.fetchDecibelCount()
                     //await hkManager.fetchHeadphoneDecibelCount()
+               // ChartMath.averageWeekdayCount(for: hkManager.environmentData)
                 isShowingPermissionSheet = !hasSeenPermissionPriming
             }
             .navigationTitle("Dashboard")

@@ -59,7 +59,8 @@ struct DecibelPieChart: View {
                             VStack {
                                 Text(selectedWeekday.date.weekdayTitle)
                                     .font(.title3.bold())
-                                    .contentTransition(.identity)
+                                    .contentTransition(.numericText())
+
 
                                 Text(selectedWeekday.value, format: .number.precision(.fractionLength(0)))
                                     .fontWeight(.medium)
@@ -74,6 +75,11 @@ struct DecibelPieChart: View {
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
+        .onChange(of: rawSelectedChartValue) { oldValue, newValue in
+            if newValue == nil  {
+                rawSelectedChartValue = oldValue
+            }
+        }
     }
 }
 

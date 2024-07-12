@@ -10,12 +10,12 @@ import Algorithms
 
 struct ChartMath {
 
-    static func averageWeekdayCount(for metric: [HealthMetric]) -> [WeedDayChartData] {
+    static func averageWeekdayCount(for metric: [HealthMetric]) -> [WeekDayChartData] {
 
         let sortedByWeekday = metric.sorted { $0.date.weekdayInt < $1.date.weekdayInt }
         let weekdayArray = sortedByWeekday.chunked { $0.date.weekdayInt == $1.date.weekdayInt }
 
-        var weekdayChartData: [WeedDayChartData] = []
+        var weekdayChartData: [WeekDayChartData] = []
 
         for array in weekdayArray {
             guard let firstValue = array.first?.value else { continue }

@@ -48,7 +48,7 @@ struct SoundChart: View {
                 if let selectedHealthMetric {
                     RuleMark(x: .value("Selected Metric", selectedHealthMetric.date, unit: .day))
                         .foregroundStyle(Color.secondary.opacity(0.3))
-                        .offset(y: 10)
+                        .offset(y: -10)
                         .annotation(
                             position: .top,
                             alignment: .center,

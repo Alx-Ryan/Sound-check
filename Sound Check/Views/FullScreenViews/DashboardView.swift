@@ -43,16 +43,20 @@ struct DashboardView: View {
                     }
                     .pickerStyle(.segmented)
                     
-                    SoundChart(selectedStat: selectedStat, chartData: hkManager.environmentData)
-
-                    DecibelPieChart(chartData: ChartMath.averageWeekdayCount(for: hkManager.environmentData))
+                    switch selectedStat {
+                        case .soundLevels:
+                            SoundChart(selectedStat: selectedStat, chartData: hkManager.environmentData)
+                            DecibelPieChart(chartData: ChartMath.averageWeekdayCount(for: hkManager.environmentData))
+                        case .headphones:
+                            HeadphoneChart(selectedStat: selectedStat, chartData: hkManager.headphonesData)
+                    }
                 }
             }
             .padding()
             .task {
-//                await hkManager.addSimulatorData()
+               // await hkManager.addSimulatorData()
                     await hkManager.fetchDecibelCount()
-                    //await hkManager.fetchHeadphoneDecibelCount()
+                    await hkManager.fetchHeadphoneDecibelCount()
                // ChartMath.averageWeekdayCount(for: hkManager.environmentData)
                 isShowingPermissionSheet = !hasSeenPermissionPriming
             }

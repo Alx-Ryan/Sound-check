@@ -117,6 +117,6 @@ struct SoundChart: View {
 }
 
 #Preview {
-    SoundChart(selectedStat: .soundLevels, chartData: HealthMetric.mockData)
+    SoundChart(selectedStat: .soundLevels, chartData: MockData.EnvironmentdB)
         .padding()
 }

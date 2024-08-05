@@ -17,6 +17,7 @@ import Observation
 
     var environmentData: [HealthMetric] = []
     var headphonesData: [HealthMetric] = []
+    var decibelDiffData: [HealthMetric] = []
 
     func fetchDecibelCount() async {
         let calendar = Calendar.current
@@ -83,6 +84,43 @@ import Observation
             let defaultDecibel = HKQuantity(unit: HKUnit.decibelAWeightedSoundPressureLevel(), doubleValue: 0.0)
 
             headphonesData = headphoneLevels.statistics().map { stat in
+                let maxQuantity = stat.maximumQuantity() ?? defaultDecibel
+                let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
+                return HealthMetric(date: stat.startDate, value: maxValue)
+            }
+        } catch {
+
+        }
+    }
+
+    func fetchHeadphoneDecibelCountDiff() async {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        guard let endDate = calendar.date(byAdding: .day, value: 1, to: today) else {
+            fatalError("Unable to calculate the end date")
+        }
+        guard let startDate = calendar.date(byAdding: .day, value: -29, to: endDate) else {
+            fatalError("Unable to calculate the start date")
+        }
+
+        let queryPredicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate)
+        let samplePredicate = HKSamplePredicate.quantitySample(
+            type: HKQuantityType(.headphoneAudioExposure),
+            predicate: queryPredicate
+        )
+        let headphoneQuery = HKStatisticsCollectionQueryDescriptor(
+            predicate: samplePredicate,
+            options: .discreteMax,
+            anchorDate: endDate,
+            intervalComponents: .init(day: 1)
+        )
+
+        do {
+            let headphoneLevels = try await headphoneQuery.result(for: store)
+
+            let defaultDecibel = HKQuantity(unit: HKUnit.decibelAWeightedSoundPressureLevel(), doubleValue: 0.0)
+
+            decibelDiffData = headphoneLevels.statistics().map { stat in
                 let maxQuantity = stat.maximumQuantity() ?? defaultDecibel
                 let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
                 return HealthMetric(date: stat.startDate, value: maxValue)

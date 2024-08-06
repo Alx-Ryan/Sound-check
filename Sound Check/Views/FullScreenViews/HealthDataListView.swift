@@ -57,7 +57,7 @@ struct HealthDataListView: View {
             .navigationTitle(metric.title)
             .alert(isPresented: $isShowingAlert, error: writeError) { writeError in
                 switch writeError {
-                    case .authNotDetermine, .noData, .unableToCompleteRequest:
+                    case .authNotDetermine, .noData, .unableToCompleteRequest, .invalidValue:
                         EmptyView()
                     case .sharingDenied(_):
                         Button("Settings") {
@@ -73,10 +73,16 @@ struct HealthDataListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
+                        guard let value = Double(valueToAdd) else {
+                            writeError = .invalidValue
+                            isShowingAddData = false
+                            valueToAdd = ""
+                            return
+                        }
                         Task {
                             if metric == .soundLevels {
                                 do {
-                                    try await hkManager.addSoundData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
+                                    try await hkManager.addSoundData(for: addDataDate, value: value)
                                     try await hkManager.fetchDecibelCount()
                                     isShowingAddData = false
                                 } catch SCError.sharingDenied(let quantityType) {
@@ -90,7 +96,7 @@ struct HealthDataListView: View {
                                 }
                             } else {
                                 do {
-                                    try await hkManager.addHeadphoneData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
+                                    try await hkManager.addHeadphoneData(for: addDataDate, value: value)
                                     try await hkManager.fetchHeadphoneDecibelCount()
                                     isShowingAddData = false
                                 } catch SCError.sharingDenied(let quantityType) {

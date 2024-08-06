@@ -130,6 +130,40 @@ import Observation
         }
     }
 
+    func addAudioExposureData(for date: Date, value: Double, typeIdentifier: HKQuantityTypeIdentifier) async {
+        let quantity = HKQuantity(unit: .decibelAWeightedSoundPressureLevel(), doubleValue: value)
+
+            // HKQuantityTypeIdentifierEnvironmentalAudioExposure requires 0.001 second time interval
+        let endDate = date.addingTimeInterval(0.001)
+
+        guard let quantityType = HKQuantityType.quantityType(forIdentifier: typeIdentifier) else {
+            print("Invalid quantity type identifier.")
+            return
+        }
+
+        let sample = HKQuantitySample(
+            type: quantityType,
+            quantity: quantity,
+            start: date,
+            end: endDate
+        )
+
+        do {
+            try await store.save(sample)
+            print("Successfully saved sample for \(typeIdentifier.rawValue).")
+        } catch {
+            print("Error saving sample for \(typeIdentifier.rawValue): \(error.localizedDescription)")
+        }
+    }
+
+    func addSoundData(for date: Date, value: Double) async {
+        await addAudioExposureData(for: date, value: value, typeIdentifier: .environmentalAudioExposure)
+    }
+
+    func addHeadphoneData(for date: Date, value: Double) async {
+        await addAudioExposureData(for: date, value: value, typeIdentifier: .headphoneAudioExposure)
+    }
+    
 //            func addSimulatorData() async {
 //                var mockSamples: [HKQuantitySample] = []
 //        

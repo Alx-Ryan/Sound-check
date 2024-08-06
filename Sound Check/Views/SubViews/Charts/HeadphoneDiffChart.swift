@@ -57,7 +57,9 @@ struct HeadphoneDiffChart: View {
             .chartYScale(domain: .automatic(includesZero: false))
             .chartXAxis {
                 AxisMarks(values: .stride(by: .day)) {
-                    AxisValueLabel(format: .dateTime.weekday(.abbreviated).day(), centered: true)
+                    AxisValueLabel(format: .dateTime.weekday(.abbreviated), centered: true)
+                    AxisValueLabel(format: .dateTime.day(), centered: true)
+                        .offset(y: 12)
                 }
             }
             .chartYAxis{

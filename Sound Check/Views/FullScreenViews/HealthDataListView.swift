@@ -8,19 +8,24 @@
 import SwiftUI
 
 struct HealthDataListView: View {
-    
+    @Environment(HealthKitManager.self) private var hkManager
+
     @State private var isShowingAddData = false
     @State private var addDataDate: Date = .now
     @State private var valueToAdd: String = ""
     
     var metric: HealthMetricContext
-    
+
+    var listData: [HealthMetric] {
+        metric == .soundLevels ? hkManager.environmentData : hkManager.headphonesData
+    }
+
     var body: some View {
-        List(0..<28) { i in
+        List(listData.reversed()) { data in
             HStack {
-                Text(Date(), format: .dateTime.month().day().year(.twoDigits))
+                Text(data.date, format: .dateTime.month().day().year(.twoDigits))
                 Spacer()
-                Text(10000, format: .number.precision(.fractionLength(metric == .soundLevels ? 0 : 1)))
+                Text(data.value, format: .number.precision(.fractionLength(metric == .soundLevels ? 0 : 1)))
             }
         }
         .navigationTitle(metric.title)
@@ -51,7 +56,17 @@ struct HealthDataListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
-                            // code later
+                        Task {
+                            if metric == .soundLevels {
+                                await hkManager.addSoundData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
+                                await hkManager.fetchDecibelCount()
+                                isShowingAddData = false
+                            } else {
+                                await hkManager.addHeadphoneData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
+                                await hkManager.fetchHeadphoneDecibelCount()
+                                isShowingAddData = false
+                            }
+                        }
                     }
                 }
                 
@@ -68,5 +83,6 @@ struct HealthDataListView: View {
 #Preview {
     NavigationStack {
         HealthDataListView(metric: .soundLevels)
+            .environment(HealthKitManager())
     }
 }

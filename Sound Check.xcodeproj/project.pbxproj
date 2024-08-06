@@ -46,6 +46,7 @@
 				FullScreenViews/HealthKitPermissionPrimingView.swift,
 				SubViews/Charts/DecibelPieChart.swift,
 				SubViews/Charts/HeadphoneChart.swift,
+				SubViews/Charts/HeadphoneDiffChart.swift,
 				SubViews/Charts/SoundChart.swift,
 			);
 			target = 3D7B567D2C38B63200D7FFDD /* Sound Check */;

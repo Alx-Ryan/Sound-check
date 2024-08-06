@@ -79,7 +79,7 @@ struct HeadphoneChart: View {
                 }
             }
             .frame(height: 150)
-            .chartXSelection(value: $rawSelectedDate)
+            .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
             .chartYScale(domain: .automatic(includesZero: false))
             .chartXAxis{
                 AxisMarks{

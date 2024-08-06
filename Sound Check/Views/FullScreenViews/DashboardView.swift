@@ -27,6 +27,8 @@ struct DashboardView: View {
 
     @State private var isShowingPermissionSheet = false
     @State private var selectedStat: HealthMetricContext = .soundLevels
+    @State private var isShowingAlert = false
+    @State private var fetchError: SCError = .noData
 
     var isSteps: Bool { selectedStat == .soundLevels }
 
@@ -62,8 +64,12 @@ struct DashboardView: View {
                     isShowingPermissionSheet = true
                 } catch SCError.noData {
                     print("❌ No Data Error")
+                    fetchError = .noData
+                    isShowingAlert = true
                 } catch {
                     print("❌ Unable to complete request")
+                    fetchError = .unableToCompleteRequest
+                    isShowingAlert = true
                 }
             }
             .navigationTitle("Dashboard")
@@ -75,6 +81,12 @@ struct DashboardView: View {
             } content: {
                 HealthKitPermissionPrimingView()
             }
+            .alert(isPresented: $isShowingAlert, error: fetchError) { fetchError in
+                // action
+            } message: { fetchError in
+                Text(fetchError.failureReason)
+            }
+
         }
         .tint(isSteps ? .pink : .indigo)
     }

@@ -13,6 +13,8 @@ struct HealthDataListView: View {
     @State private var isShowingAddData = false
     @State private var addDataDate: Date = .now
     @State private var valueToAdd: String = ""
+    @State private var isShowingAlert = false
+    @State private var writeError: SCError = .noData
 
     var metric: HealthMetricContext
 
@@ -53,6 +55,21 @@ struct HealthDataListView: View {
                 }
             }
             .navigationTitle(metric.title)
+            .alert(isPresented: $isShowingAlert, error: writeError) { writeError in
+                switch writeError {
+                    case .authNotDetermine, .noData, .unableToCompleteRequest:
+                        EmptyView()
+                    case .sharingDenied(let quantityType):
+                        Button("Settings") {
+                            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(settingsURL)
+                            }
+                        }
+                        Button("Cancel", role: .cancel) { }
+                }
+            } message: { writeError in
+                Text(writeError.failureReason)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
@@ -64,8 +81,12 @@ struct HealthDataListView: View {
                                     isShowingAddData = false
                                 } catch SCError.sharingDenied(let quantityType) {
                                     print("❌ Sharing denied for \(quantityType)")
+                                    writeError = .sharingDenied(quantityType: quantityType)
+                                    isShowingAlert = true
                                 } catch {
                                     print("❌ Data list view unable to complete request")
+                                    writeError = .unableToCompleteRequest
+                                    isShowingAlert = true
                                 }
                             } else {
                                 do {
@@ -74,8 +95,12 @@ struct HealthDataListView: View {
                                     isShowingAddData = false
                                 } catch SCError.sharingDenied(let quantityType) {
                                     print("❌ Sharing denied for \(quantityType)")
+                                    writeError = .sharingDenied(quantityType: quantityType)
+                                    isShowingAlert = true
                                 } catch {
                                     print("❌ Data list view unable to complete request")
+                                    writeError = .unableToCompleteRequest
+                                    isShowingAlert = true
                                 }
                             }
                         }

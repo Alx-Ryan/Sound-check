@@ -25,8 +25,6 @@ enum HealthMetricContext: CaseIterable, Identifiable {
 struct DashboardView: View {
     @Environment(HealthKitManager.self) private var hkManager
 
-    @AppStorage("hasSeenPermissionPriming") private var hasSeenPermissionPriming = false
-
     @State private var isShowingPermissionSheet = false
     @State private var selectedStat: HealthMetricContext = .soundLevels
 
@@ -55,11 +53,18 @@ struct DashboardView: View {
             }
             .padding()
             .task {
-               // await hkManager.addSimulatorData()
-                await hkManager.fetchDecibelCount()
-                await hkManager.fetchHeadphoneDecibelCount()
-                await hkManager.fetchHeadphoneDecibelCountDiff()
-                isShowingPermissionSheet = !hasSeenPermissionPriming
+                    // await hkManager.addSimulatorData()
+                do {
+                    try await hkManager.fetchDecibelCount()
+                    try await hkManager.fetchHeadphoneDecibelCount()
+                    try await hkManager.fetchHeadphoneDecibelCountDiff()
+                } catch SCError.authNotDetermine {
+                    isShowingPermissionSheet = true
+                } catch SCError.noData {
+                    print("❌ No Data Error")
+                } catch {
+                    print("❌ Unable to complete request")
+                }
             }
             .navigationTitle("Dashboard")
             .navigationDestination(for: HealthMetricContext.self) { metric in
@@ -68,7 +73,7 @@ struct DashboardView: View {
             .sheet(isPresented: $isShowingPermissionSheet) {
                     // fetch health data
             } content: {
-                HealthKitPermissionPrimingView(hasSeen: $hasSeenPermissionPriming)
+                HealthKitPermissionPrimingView()
             }
         }
         .tint(isSteps ? .pink : .indigo)

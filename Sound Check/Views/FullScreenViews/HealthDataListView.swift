@@ -13,7 +13,7 @@ struct HealthDataListView: View {
     @State private var isShowingAddData = false
     @State private var addDataDate: Date = .now
     @State private var valueToAdd: String = ""
-    
+
     var metric: HealthMetricContext
 
     var listData: [HealthMetric] {
@@ -38,7 +38,7 @@ struct HealthDataListView: View {
             }
         }
     }
-    
+
     var addDataView: some View {
         NavigationStack {
             Form {
@@ -58,18 +58,30 @@ struct HealthDataListView: View {
                     Button("Add Data") {
                         Task {
                             if metric == .soundLevels {
-                                await hkManager.addSoundData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
-                                await hkManager.fetchDecibelCount()
-                                isShowingAddData = false
+                                do {
+                                    try await hkManager.addSoundData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
+                                    try await hkManager.fetchDecibelCount()
+                                    isShowingAddData = false
+                                } catch SCError.sharingDenied(let quantityType) {
+                                    print("❌ Sharing denied for \(quantityType)")
+                                } catch {
+                                    print("❌ Data list view unable to complete request")
+                                }
                             } else {
-                                await hkManager.addHeadphoneData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
-                                await hkManager.fetchHeadphoneDecibelCount()
-                                isShowingAddData = false
+                                do {
+                                    try await hkManager.addHeadphoneData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
+                                    try await hkManager.fetchHeadphoneDecibelCount()
+                                    isShowingAddData = false
+                                } catch SCError.sharingDenied(let quantityType) {
+                                    print("❌ Sharing denied for \(quantityType)")
+                                } catch {
+                                    print("❌ Data list view unable to complete request")
+                                }
                             }
                         }
                     }
                 }
-                
+
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
                         isShowingAddData = false

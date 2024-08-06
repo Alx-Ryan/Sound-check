@@ -9,8 +9,15 @@ import Foundation
 import HealthKitUI
 import Observation
 
+enum SCError: Error {
+    case authNotDetermine
+    case sharingDenied(quantityType: String)
+    case noData
+    case unableToCompleteRequest
+}
+
 @Observable class HealthKitManager {
-    
+
     let store = HKHealthStore()
 
     let types: Set = [HKQuantityType(.environmentalAudioExposure), HKQuantityType(.headphoneAudioExposure)]
@@ -19,7 +26,11 @@ import Observation
     var headphonesData: [HealthMetric] = []
     var decibelDiffData: [HealthMetric] = []
 
-    func fetchDecibelCount() async {
+    func fetchDecibelCount() async throws {
+        guard store.authorizationStatus(for: HKQuantityType(.environmentalAudioExposure)) != .notDetermined else {
+            throw SCError.authNotDetermine
+        }
+
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
         guard let endDate = calendar.date(byAdding: .day, value: 1, to: today) else {
@@ -42,7 +53,7 @@ import Observation
         )
 
         do {
-        let environmentLevels = try await environmentQuery.result(for: store)
+            let environmentLevels = try await environmentQuery.result(for: store)
 
             let defaultDecibel = HKQuantity(unit: HKUnit.decibelAWeightedSoundPressureLevel(), doubleValue: 0.0)
 
@@ -51,12 +62,18 @@ import Observation
                 let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
                 return HealthMetric(date: stat.startDate, value: maxValue)
             }
-    } catch {
-
+        } catch HKError.errorNoData {
+            throw SCError.noData
+        } catch {
+            throw SCError.unableToCompleteRequest
         }
     }
 
-    func fetchHeadphoneDecibelCount() async {
+    func fetchHeadphoneDecibelCount() async throws {
+        guard store.authorizationStatus(for: HKQuantityType(.headphoneAudioExposure)) != .notDetermined else {
+            throw SCError.authNotDetermine
+        }
+
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
         guard let endDate = calendar.date(byAdding: .day, value: 1, to: today) else {
@@ -88,12 +105,18 @@ import Observation
                 let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
                 return HealthMetric(date: stat.startDate, value: maxValue)
             }
+        } catch HKError.errorNoData {
+            throw SCError.noData
         } catch {
-
+            throw SCError.unableToCompleteRequest
         }
     }
 
-    func fetchHeadphoneDecibelCountDiff() async {
+    func fetchHeadphoneDecibelCountDiff() async throws {
+        guard store.authorizationStatus(for: HKQuantityType(.headphoneAudioExposure)) != .notDetermined else {
+            throw SCError.authNotDetermine
+        }
+
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
         guard let endDate = calendar.date(byAdding: .day, value: 1, to: today) else {
@@ -125,12 +148,26 @@ import Observation
                 let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
                 return HealthMetric(date: stat.startDate, value: maxValue)
             }
+        } catch HKError.errorNoData {
+            throw SCError.noData
         } catch {
-
+            throw SCError.unableToCompleteRequest
         }
     }
 
-    func addAudioExposureData(for date: Date, value: Double, typeIdentifier: HKQuantityTypeIdentifier) async {
+    func addAudioExposureData(for date: Date, value: Double, typeIdentifier: HKQuantityTypeIdentifier) async throws {
+        let status = store.authorizationStatus(for: HKQuantityType(typeIdentifier))
+        switch status {
+            case .notDetermined:
+                throw SCError.authNotDetermine
+            case .sharingDenied:
+                throw SCError.sharingDenied(quantityType: typeIdentifier == .environmentalAudioExposure ? "Environmental Sound Levels" : "Headphone Audio Levels")
+            case .sharingAuthorized:
+                break
+            @unknown default:
+                break
+        }
+
         let quantity = HKQuantity(unit: .decibelAWeightedSoundPressureLevel(), doubleValue: value)
 
             // HKQuantityTypeIdentifierEnvironmentalAudioExposure requires 0.001 second time interval
@@ -153,15 +190,16 @@ import Observation
             print("Successfully saved sample for \(typeIdentifier.rawValue).")
         } catch {
             print("Error saving sample for \(typeIdentifier.rawValue): \(error.localizedDescription)")
+            throw SCError.unableToCompleteRequest
         }
     }
 
-    func addSoundData(for date: Date, value: Double) async {
-        await addAudioExposureData(for: date, value: value, typeIdentifier: .environmentalAudioExposure)
+    func addSoundData(for date: Date, value: Double) async throws {
+        try await addAudioExposureData(for: date, value: value, typeIdentifier: .environmentalAudioExposure)
     }
 
-    func addHeadphoneData(for date: Date, value: Double) async {
-        await addAudioExposureData(for: date, value: value, typeIdentifier: .headphoneAudioExposure)
+    func addHeadphoneData(for date: Date, value: Double) async throws {
+        try await addAudioExposureData(for: date, value: value, typeIdentifier: .headphoneAudioExposure)
     }
     
 //            func addSimulatorData() async {

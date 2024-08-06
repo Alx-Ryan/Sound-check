@@ -30,6 +30,7 @@ struct ChartMath {
     static func averageDailySoundDiffs(for decibel: [HealthMetric]) -> [WeekDayChartData] {
         var diffValues: [(date: Date, value: Double)] = []
 
+        guard !decibel.isEmpty, decibel.count > 1 else { return [] }
         for i in 1..<decibel.count {
                 let date = decibel[i].date
                 let diff = decibel[i].value - decibel[i - 1].value

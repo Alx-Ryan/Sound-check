@@ -1,22 +1,20 @@
 //
-//  SoundChart.swift
+//  HeadphoneChart.swift
 //  Sound Check
 //
-//  Created by Alex Ryan on 7/11/24.
+//  Created by Alex Ryan on 7/31/24.
 //
 
 import SwiftUI
 import Charts
 
-struct SoundChart: View {
+struct HeadphoneChart: View {
     @State private var rawSelectedDate: Date?
 
     var selectedStat: HealthMetricContext
     var chartData: [HealthMetric]
-    var avgDecibel: Double {
-        guard !chartData.isEmpty else { return 0 }
-        let totalDecibels = chartData.reduce(0) { $0 + $1.value }
-        return totalDecibels / Double(chartData.count)
+    var minValue: Double {
+        chartData.map { $0.value }.min() ?? 0
     }
     var selectedHealthMetric: HealthMetric? {
         guard let rawSelectedDate else { return nil }
@@ -30,11 +28,11 @@ struct SoundChart: View {
             NavigationLink(value: selectedStat) {
                 HStack {
                     VStack(alignment: .leading) {
-                        Label("Sound Levels", systemImage: "waveform")
+                        Label("Headphone dB", systemImage: "ear.badge.waveform")
                             .font(.title3.bold())
-                            .foregroundStyle(.pink)
+                            .foregroundStyle(.indigo)
 
-                        Text("Avg: \(Double(avgDecibel), format: .number.precision(.fractionLength(0))) Decibels")
+                        Text("Avg: Decibels")
                             .font(.caption)
                     }
                     Spacer()
@@ -57,28 +55,32 @@ struct SoundChart: View {
                                 annotationView
                             }
                 }
-
-                RuleMark(y: .value("Average", avgDecibel))
-                    .foregroundStyle(Color.secondary)
+                RuleMark(y: .value("Goal", 55))
+                    .foregroundStyle(.mint)
                     .lineStyle(.init(lineWidth: 1, dash: [5]))
 
-                ForEach(chartData) { decibel in
-                    PointMark(
-                        x: .value("Date", decibel.date, unit: .day),
-                        y: .value("Decibels", decibel.value)
-                    )
-                    .opacity(rawSelectedDate == nil || decibel.date == selectedHealthMetric?.date ? 1.0 : 0.3)
+                ForEach(chartData) { headphonedB in
                     LineMark(
-                        x: .value("Date", decibel.date, unit: .day),
-                        y: .value("Decibels", decibel.value)
+                        x: .value("Day", headphonedB.date, unit: .day),
+                        y: .value("Value", headphonedB.value)
                     )
-                    .opacity(0.3)
+                    .foregroundStyle(.indigo.gradient)
+                    .interpolationMethod(.cardinal)
+                    .symbol(.circle)
+                    .symbolSize(50)
+
+                    AreaMark(
+                        x: .value("Day", headphonedB.date, unit: .day),
+                        yStart: .value("Value", headphonedB.value),
+                        yEnd: .value("Min Value", minValue - 15)
+                    )
+                    .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
+                    .interpolationMethod(.cardinal)
                 }
-                .foregroundStyle(Color.pink.gradient)
             }
             .frame(height: 150)
             .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
-
+            .chartYScale(domain: .automatic(includesZero: false))
             .chartXAxis{
                 AxisMarks{
                     AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
@@ -89,7 +91,7 @@ struct SoundChart: View {
                     AxisGridLine()
                         .foregroundStyle(Color.secondary.opacity(0.3))
 
-                    AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
+                    AxisValueLabel()
                 }
             }
         }
@@ -103,9 +105,9 @@ struct SoundChart: View {
                 .font(.footnote.bold())
                 .foregroundStyle(.secondary)
 
-            Text(selectedHealthMetric?.value ?? 0, format: .number.precision(.fractionLength(0)))
+            Text(selectedHealthMetric?.value ?? 0, format: .number.precision(.fractionLength(1)))
                 .fontWeight(.heavy)
-                .foregroundStyle(.pink)
+                .foregroundStyle(.indigo)
         }
         .padding(12)
         .background(
@@ -117,6 +119,5 @@ struct SoundChart: View {
 }
 
 #Preview {
-    SoundChart(selectedStat: .soundLevels, chartData: MockData.EnvironmentdB)
-        .padding()
+    HeadphoneChart(selectedStat: .headphones, chartData: MockData.HeadphonedB)
 }

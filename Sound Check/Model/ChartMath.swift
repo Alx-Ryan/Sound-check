@@ -18,12 +18,37 @@ struct ChartMath {
         var weekdayChartData: [WeekDayChartData] = []
 
         for array in weekdayArray {
-            guard let firstValue = array.first?.value else { continue }
+            guard let firstValue = array.first else { continue }
             let total = array.reduce(0) { $0 + $1.value }
             let avgDecibel = total / Double(array.count)
 
-            weekdayChartData.append(.init(date: array.first!.date, value: avgDecibel))
+            weekdayChartData.append(.init(date: firstValue.date, value: avgDecibel))
         }
+        return weekdayChartData
+    }
+
+    static func averageDailySoundDiffs(for decibel: [HealthMetric]) -> [WeekDayChartData] {
+        var diffValues: [(date: Date, value: Double)] = []
+
+        for i in 1..<decibel.count {
+                let date = decibel[i].date
+                let diff = decibel[i].value - decibel[i - 1].value
+                diffValues.append((date: date, value: diff))
+            }
+
+        let sortedByWeekday = diffValues.sorted { $0.date.weekdayInt < $1.date.weekdayInt }
+        let weekdayArray = sortedByWeekday.chunked { $0.date.weekdayInt == $1.date.weekdayInt }
+
+        var weekdayChartData: [WeekDayChartData] = []
+
+        for array in weekdayArray {
+            guard let firstValue = array.first else { continue }
+            let total = array.reduce(0) { $0 + $1.value }
+            let avgDecibelDiff = total / Double(array.count)
+
+            weekdayChartData.append(.init(date: firstValue.date, value: avgDecibelDiff))
+        }
+        
         return weekdayChartData
     }
 }

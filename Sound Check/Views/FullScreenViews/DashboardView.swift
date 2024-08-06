@@ -11,7 +11,7 @@ import Charts
 enum HealthMetricContext: CaseIterable, Identifiable {
     case soundLevels, headphones
     var id: Self { self }
-    
+
     var title: String {
         switch self {
             case .soundLevels:
@@ -26,12 +26,12 @@ struct DashboardView: View {
     @Environment(HealthKitManager.self) private var hkManager
 
     @AppStorage("hasSeenPermissionPriming") private var hasSeenPermissionPriming = false
-    
+
     @State private var isShowingPermissionSheet = false
     @State private var selectedStat: HealthMetricContext = .soundLevels
 
     var isSteps: Bool { selectedStat == .soundLevels }
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -42,18 +42,23 @@ struct DashboardView: View {
                         }
                     }
                     .pickerStyle(.segmented)
-                    
-                    SoundChart(selectedStat: selectedStat, chartData: hkManager.environmentData)
 
-                    DecibelPieChart(chartData: ChartMath.averageWeekdayCount(for: hkManager.environmentData))
+                    switch selectedStat {
+                        case .soundLevels:
+                            SoundChart(selectedStat: selectedStat, chartData: hkManager.environmentData)
+                            DecibelPieChart(chartData: ChartMath.averageWeekdayCount(for: hkManager.environmentData))
+                        case .headphones:
+                            HeadphoneChart(selectedStat: selectedStat, chartData: hkManager.headphonesData)
+                            HeadphoneDiffChart(chartData: ChartMath.averageDailySoundDiffs(for: hkManager.decibelDiffData))
+                    }
                 }
             }
             .padding()
             .task {
-//                await hkManager.addSimulatorData()
-                    await hkManager.fetchDecibelCount()
-                    //await hkManager.fetchHeadphoneDecibelCount()
-               // ChartMath.averageWeekdayCount(for: hkManager.environmentData)
+               // await hkManager.addSimulatorData()
+                await hkManager.fetchDecibelCount()
+                await hkManager.fetchHeadphoneDecibelCount()
+                await hkManager.fetchHeadphoneDecibelCountDiff()
                 isShowingPermissionSheet = !hasSeenPermissionPriming
             }
             .navigationTitle("Dashboard")
@@ -68,8 +73,6 @@ struct DashboardView: View {
         }
         .tint(isSteps ? .pink : .indigo)
     }
-
-    
 }
 
 #Preview {

@@ -30,7 +30,7 @@ struct DashboardView: View {
     @State private var isShowingAlert = false
     @State private var fetchError: SCError = .noData
 
-    var isSteps: Bool { selectedStat == .soundLevels }
+    var isSound: Bool { selectedStat == .soundLevels }
 
     var body: some View {
         NavigationStack {
@@ -45,10 +45,10 @@ struct DashboardView: View {
 
                     switch selectedStat {
                         case .soundLevels:
-                            SoundChart(selectedStat: selectedStat, chartData: hkManager.environmentData)
+                            SoundChart(chartData: ChartHelper.convert(data: hkManager.environmentData))
                             DecibelPieChart(chartData: ChartMath.averageWeekdayCount(for: hkManager.environmentData))
                         case .headphones:
-                            HeadphoneChart(selectedStat: selectedStat, chartData: hkManager.headphonesData)
+                            HeadphoneChart(chartData: ChartHelper.convert(data: hkManager.headphonesData))
                             HeadphoneDiffChart(chartData: ChartMath.averageDailySoundDiffs(for: hkManager.decibelDiffData))
                     }
                 }
@@ -88,7 +88,7 @@ struct DashboardView: View {
             }
 
         }
-        .tint(isSteps ? .pink : .indigo)
+        .tint(isSound ? .pink : .indigo)
     }
 }
 

@@ -13,8 +13,8 @@ struct DecibelPieChart: View {
     @State private var rawSelectedChartValue: Double? = 0
     @State private var selectedDay: Date?
 
-    var chartData: [WeekDayChartData]
-    var selectedWeekday: WeekDayChartData? {
+    var chartData: [DateValueChartData]
+    var selectedWeekday: DateValueChartData? {
         guard let rawSelectedChartValue else { return nil }
         var total = 0.0
 
@@ -25,20 +25,14 @@ struct DecibelPieChart: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
-            VStack(alignment: .leading) {
-                Label("Sound Averages", systemImage: "chart.dots.scatter")
-                    .font(.title3.bold())
-                    .foregroundStyle(.pink)
-
-                Text("Last 28 Days")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.bottom, 12)
-
-            if chartData.isEmpty {
-                ChartEmptyView(systemImageName: "chart.pie", title: "No Data", description: "There is no sound data from the Health App")
+        ChartContainer(
+            title: "Sound Averages",
+            symbol: "chart.dots.scatter",
+            subTitle: "Last 28 Days",
+            context: .soundLevels,
+            isNav: false) {
+                if chartData.isEmpty {
+                    ChartEmptyView(systemImageName: "chart.pie", title: "No Data", description: "There is no sound data from the Health App")
             } else {
                 Chart {
                     ForEach(chartData) { weekday in
@@ -78,8 +72,6 @@ struct DecibelPieChart: View {
                 }
             }
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: selectedWeekday) { oldValue, newValue in
             guard let oldValue, let newValue else { return }

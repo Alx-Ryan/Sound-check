@@ -25,12 +25,12 @@ struct DecibelPieChart: View {
     }
 
     var body: some View {
-        ChartContainer(
-            title: "Sound Averages",
-            symbol: "chart.dots.scatter",
-            subTitle: "Last 28 Days",
-            context: .soundLevels,
-            isNav: false) {
+        let config = ChartContainerConfiguration(title: "Sound Averages",
+                                                 symbol: "chart.dots.scatter",
+                                                 subTitle: "Last 28 Days",
+                                                 context: .soundLevels,
+                                                 isNav: false)
+        ChartContainer(config: config) {
                 if chartData.isEmpty {
                     ChartEmptyView(systemImageName: "chart.pie", title: "No Data", description: "There is no sound data from the Health App")
             } else {

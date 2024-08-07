@@ -18,25 +18,18 @@ struct HeadphoneDiffChart: View {
     }
 
     var body: some View {
-        ChartContainer(
-            title: "Average Decibel Change",
-            symbol: "ear.badge.waveform",
-            subTitle: "Per WeekDay (Last 28 Days)",
-            context: .headphones,
-            isNav: false) {
+        let config = ChartContainerConfiguration(title: "Average Decibel Change",
+                                                 symbol: "ear.badge.waveform",
+                                                 subTitle: "Per WeekDay (Last 28 Days)",
+                                                 context: .headphones,
+                                                 isNav: false)
+        ChartContainer(config: config) {
                 if chartData.isEmpty {
                     ChartEmptyView(systemImageName: "chart.bar", title: "No Data", description: "There is no sound data from the Health App")
             } else {
                 Chart {
                     if let selectedData {
-                        RuleMark(x: .value("Selected Data", selectedData.date, unit: .day))
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                            .offset(y: -10)
-                            .annotation(position: .top,
-                                        spacing: 0,
-                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                ChartAnnotationView(data: selectedData, context: .headphones, style: ((selectedData.value) <= 0 ? .indigo : .purple))
-                            }
+                        ChartAnnotationView(data: selectedData, context: .headphones, style: ((selectedData.value) <= 0 ? .indigo : .purple))
                     }
                     ForEach(chartData) { DecibelDiff in
                         BarMark(

@@ -18,27 +18,18 @@ struct SoundChart: View {
     }
 
     var body: some View {
-        ChartContainer(
-            title: "Sound Levels",
-            symbol: "waveform",
-            subTitle: "Avg: \(Double(ChartHelper.averageValue(for: chartData)).formatted(.number.precision(.significantDigits(4)))) Decibels",
-            context: .soundLevels,
-            isNav: true) {
+        let config = ChartContainerConfiguration(title: "Sound Levels",
+                                                 symbol: "waveform",
+                                                 subTitle: "Avg: \(Double(ChartHelper.averageValue(for: chartData)).formatted(.number.precision(.significantDigits(4)))) Decibels",
+                                                 context: .soundLevels,
+                                                 isNav: true)
+        ChartContainer(config: config) {
                 if chartData.isEmpty {
                     ChartEmptyView(systemImageName: "chart.bar", title: "No Data", description: "There is no sound data from the Health App")
                 } else {
                     Chart {
                         if let selectedData {
-                            RuleMark(x: .value("Selected Metric", selectedData.date, unit: .day))
-                                .foregroundStyle(Color.secondary.opacity(0.3))
-                                .offset(y: -10)
-                                .annotation(
-                                    position: .top,
-                                    alignment: .center,
-                                    spacing: 0,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                        ChartAnnotationView(data: selectedData, context: .soundLevels, style: nil)
-                                    }
+                            ChartAnnotationView(data: selectedData, context: .soundLevels, style: nil)
                         }
 
                         RuleMark(y: .value("Average", ChartHelper.averageValue(for: chartData)))

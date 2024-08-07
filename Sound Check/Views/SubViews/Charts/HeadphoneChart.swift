@@ -21,27 +21,18 @@ struct HeadphoneChart: View {
     }
 
     var body: some View {
-        ChartContainer(
-            title: "Headphone dB",
-            symbol: "ear.badge.waveform",
-            subTitle: "Avg: Decibels",
-            context: .headphones,
-            isNav: true) {
+        let config = ChartContainerConfiguration(title: "Headphone dB",
+                                                 symbol: "ear.badge.waveform",
+                                                 subTitle: "Avg: Decibels",
+                                                 context: .headphones,
+                                                 isNav: true)
+        ChartContainer(config: config) {
                 if chartData.isEmpty {
                     ChartEmptyView(systemImageName: "chart.xyaxis.line", title: "No Data", description: "There is no sound data from the Health App")
             } else {
                 Chart {
                     if let selectedData {
-                        RuleMark(x: .value("Selected Metric", selectedData.date, unit: .day))
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                            .offset(y: -10)
-                            .annotation(
-                                position: .top,
-                                alignment: .center,
-                                spacing: 0,
-                                overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                    ChartAnnotationView(data: selectedData, context: .headphones, style: nil)
-                                }
+                        ChartAnnotationView(data: selectedData, context: .headphones, style: nil)
                     }
                     RuleMark(y: .value("Goal", 55))
                         .foregroundStyle(.mint)

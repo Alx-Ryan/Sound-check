@@ -10,12 +10,12 @@ import Algorithms
 
 struct ChartMath {
 
-    static func averageWeekdayCount(for metric: [HealthMetric]) -> [WeekDayChartData] {
+    static func averageWeekdayCount(for metric: [HealthMetric]) -> [DateValueChartData] {
 
         let sortedByWeekday = metric.sorted { $0.date.weekdayInt < $1.date.weekdayInt }
         let weekdayArray = sortedByWeekday.chunked { $0.date.weekdayInt == $1.date.weekdayInt }
 
-        var weekdayChartData: [WeekDayChartData] = []
+        var weekdayChartData: [DateValueChartData] = []
 
         for array in weekdayArray {
             guard let firstValue = array.first else { continue }
@@ -27,7 +27,7 @@ struct ChartMath {
         return weekdayChartData
     }
 
-    static func averageDailySoundDiffs(for decibel: [HealthMetric]) -> [WeekDayChartData] {
+    static func averageDailySoundDiffs(for decibel: [HealthMetric]) -> [DateValueChartData] {
         var diffValues: [(date: Date, value: Double)] = []
 
         guard !decibel.isEmpty, decibel.count > 1 else { return [] }
@@ -40,7 +40,7 @@ struct ChartMath {
         let sortedByWeekday = diffValues.sorted { $0.date.weekdayInt < $1.date.weekdayInt }
         let weekdayArray = sortedByWeekday.chunked { $0.date.weekdayInt == $1.date.weekdayInt }
 
-        var weekdayChartData: [WeekDayChartData] = []
+        var weekdayChartData: [DateValueChartData] = []
 
         for array in weekdayArray {
             guard let firstValue = array.first else { continue }

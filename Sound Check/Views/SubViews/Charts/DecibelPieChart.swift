@@ -13,8 +13,8 @@ struct DecibelPieChart: View {
     @State private var rawSelectedChartValue: Double? = 0
     @State private var selectedDay: Date?
 
-    var chartData: [WeekDayChartData]
-    var selectedWeekday: WeekDayChartData? {
+    var chartData: [DateValueChartData]
+    var selectedWeekday: DateValueChartData? {
         guard let rawSelectedChartValue else { return nil }
         var total = 0.0
 

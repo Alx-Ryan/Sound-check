@@ -25,26 +25,14 @@ struct HeadphoneChart: View {
     }
 
     var body: some View {
-        VStack {
-            NavigationLink(value: selectedStat) {
-                HStack {
-                    VStack(alignment: .leading) {
-                        Label("Headphone dB", systemImage: "ear.badge.waveform")
-                            .font(.title3.bold())
-                            .foregroundStyle(.indigo)
-
-                        Text("Avg: Decibels")
-                            .font(.caption)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                }
-            }
-            .foregroundStyle(.secondary)
-            .padding(.bottom, 12)
-            
-            if chartData.isEmpty {
-                ChartEmptyView(systemImageName: "chart.xyaxis.line", title: "No Data", description: "There is no sound data from the Health App")
+        ChartContainer(
+            title: "Headphone dB",
+            symbol: "ear.badge.waveform",
+            subTitle: "Avg: Decibels",
+            context: selectedStat,
+            isNav: true) {
+                if chartData.isEmpty {
+                    ChartEmptyView(systemImageName: "chart.xyaxis.line", title: "No Data", description: "There is no sound data from the Health App")
             } else {
                 Chart {
                     if let selectedHealthMetric {
@@ -100,8 +88,6 @@ struct HeadphoneChart: View {
                 }
             }
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: rawSelectedDate) { oldValue, newValue in
             if oldValue?.weekdayInt != newValue?.weekdayInt {

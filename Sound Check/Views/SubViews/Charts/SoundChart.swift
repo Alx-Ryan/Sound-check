@@ -27,79 +27,65 @@ struct SoundChart: View {
     }
 
     var body: some View {
-        VStack {
-            NavigationLink(value: selectedStat) {
-                HStack {
-                    VStack(alignment: .leading) {
-                        Label("Sound Levels", systemImage: "waveform")
-                            .font(.title3.bold())
-                            .foregroundStyle(.pink)
+        ChartContainer(
+            title: "Sound Levels",
+            symbol: "waveform",
+            subTitle: "Avg: \(Double(avgDecibel).formatted(.number.precision(.significantDigits(4)))) Decibels",
+            context: selectedStat,
+            isNav: true) {
+                if chartData.isEmpty {
+                    ChartEmptyView(systemImageName: "chart.bar", title: "No Data", description: "There is no sound data from the Health App")
+                } else {
+                    Chart {
+                        if let selectedHealthMetric {
+                            RuleMark(x: .value("Selected Metric", selectedHealthMetric.date, unit: .day))
+                                .foregroundStyle(Color.secondary.opacity(0.3))
+                                .offset(y: -10)
+                                .annotation(
+                                    position: .top,
+                                    alignment: .center,
+                                    spacing: 0,
+                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                        annotationView
+                                    }
+                        }
 
-                        Text("Avg: \(Double(avgDecibel), format: .number.precision(.fractionLength(0))) Decibels")
-                            .font(.caption)
+                        RuleMark(y: .value("Average", avgDecibel))
+                            .foregroundStyle(Color.secondary)
+                            .lineStyle(.init(lineWidth: 1, dash: [5]))
+
+                        ForEach(chartData) { decibel in
+                            PointMark(
+                                x: .value("Date", decibel.date, unit: .day),
+                                y: .value("Decibels", decibel.value)
+                            )
+                            .opacity(rawSelectedDate == nil || decibel.date == selectedHealthMetric?.date ? 1.0 : 0.3)
+                            LineMark(
+                                x: .value("Date", decibel.date, unit: .day),
+                                y: .value("Decibels", decibel.value)
+                            )
+                            .opacity(0.3)
+                        }
+                        .foregroundStyle(Color.pink.gradient)
                     }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                }
-            }
-            .foregroundStyle(.secondary)
-            .padding(.bottom, 12)
+                    .frame(height: 150)
+                    .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
 
-            if chartData.isEmpty {
-                ChartEmptyView(systemImageName: "chart.bar", title: "No Data", description: "There is no sound data from the Health App")
-            } else {
-                Chart {
-                    if let selectedHealthMetric {
-                        RuleMark(x: .value("Selected Metric", selectedHealthMetric.date, unit: .day))
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                            .offset(y: -10)
-                            .annotation(
-                                position: .top,
-                                alignment: .center,
-                                spacing: 0,
-                                overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                    annotationView
-                                }
+                    .chartXAxis{
+                        AxisMarks{
+                            AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
+                        }
                     }
+                    .chartYAxis{
+                        AxisMarks { value in
+                            AxisGridLine()
+                                .foregroundStyle(Color.secondary.opacity(0.3))
 
-                    RuleMark(y: .value("Average", avgDecibel))
-                        .foregroundStyle(Color.secondary)
-                        .lineStyle(.init(lineWidth: 1, dash: [5]))
-
-                    ForEach(chartData) { decibel in
-                        PointMark(
-                            x: .value("Date", decibel.date, unit: .day),
-                            y: .value("Decibels", decibel.value)
-                        )
-                        .opacity(rawSelectedDate == nil || decibel.date == selectedHealthMetric?.date ? 1.0 : 0.3)
-                        LineMark(
-                            x: .value("Date", decibel.date, unit: .day),
-                            y: .value("Decibels", decibel.value)
-                        )
-                        .opacity(0.3)
-                    }
-                    .foregroundStyle(Color.pink.gradient)
-                }
-                .frame(height: 150)
-                .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
-
-                .chartXAxis{
-                    AxisMarks{
-                        AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
-                    }
-                }
-                .chartYAxis{
-                    AxisMarks { value in
-                        AxisGridLine()
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-
-                        AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
+                            AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
+                        }
                     }
                 }
             }
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: rawSelectedDate) { oldValue, newValue in
             if oldValue?.weekdayInt != newValue?.weekdayInt {

@@ -30,7 +30,7 @@ struct DashboardView: View {
     @State private var isShowingAlert = false
     @State private var fetchError: SCError = .noData
 
-    var isSteps: Bool { selectedStat == .soundLevels }
+    var isSound: Bool { selectedStat == .soundLevels }
 
     var body: some View {
         NavigationStack {
@@ -88,7 +88,7 @@ struct DashboardView: View {
             }
 
         }
-        .tint(isSteps ? .pink : .indigo)
+        .tint(isSound ? .pink : .indigo)
     }
 }
 

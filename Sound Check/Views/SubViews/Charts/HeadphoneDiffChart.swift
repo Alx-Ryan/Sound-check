@@ -21,23 +21,14 @@ struct HeadphoneDiffChart: View {
     }
 
     var body: some View {
-        VStack {
-            HStack {
-                VStack(alignment: .leading) {
-                    Label("Average Decibel Change", systemImage: "ear.badge.waveform")
-                        .font(.title3.bold())
-                        .foregroundStyle(.indigo)
-
-                    Text("Per WeekDay (Last 28 Days)")
-                        .font(.caption)
-                }
-                Spacer()
-            }
-            .foregroundStyle(.secondary)
-            .padding(.bottom, 12)
-            
-            if chartData.isEmpty {
-                ChartEmptyView(systemImageName: "chart.bar", title: "No Data", description: "There is no sound data from the Health App")
+        ChartContainer(
+            title: "Average Decibel Change",
+            symbol: "ear.badge.waveform",
+            subTitle: "Per WeekDay (Last 28 Days)",
+            context: .headphones,
+            isNav: false) {
+                if chartData.isEmpty {
+                    ChartEmptyView(systemImageName: "chart.bar", title: "No Data", description: "There is no sound data from the Health App")
             } else {
                 Chart {
                     if let selectedData {
@@ -76,8 +67,6 @@ struct HeadphoneDiffChart: View {
                 }
             }
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
         .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: rawSelectedDate) { oldValue, newValue in
             if oldValue?.weekdayInt != newValue?.weekdayInt {

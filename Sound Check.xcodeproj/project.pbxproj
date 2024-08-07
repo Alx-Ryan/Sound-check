@@ -44,6 +44,7 @@
 				FullScreenViews/DashboardView.swift,
 				FullScreenViews/HealthDataListView.swift,
 				FullScreenViews/HealthKitPermissionPrimingView.swift,
+				SubViews/Charts/ChartEmptyView.swift,
 				SubViews/Charts/DecibelPieChart.swift,
 				SubViews/Charts/HeadphoneChart.swift,
 				SubViews/Charts/HeadphoneDiffChart.swift,

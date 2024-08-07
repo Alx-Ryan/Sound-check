@@ -13,7 +13,9 @@ struct HealthDataListView: View {
     @State private var isShowingAddData = false
     @State private var addDataDate: Date = .now
     @State private var valueToAdd: String = ""
-    
+    @State private var isShowingAlert = false
+    @State private var writeError: SCError = .noData
+
     var metric: HealthMetricContext
 
     var listData: [HealthMetric] {
@@ -38,7 +40,7 @@ struct HealthDataListView: View {
             }
         }
     }
-    
+
     var addDataView: some View {
         NavigationStack {
             Form {
@@ -53,23 +55,64 @@ struct HealthDataListView: View {
                 }
             }
             .navigationTitle(metric.title)
+            .alert(isPresented: $isShowingAlert, error: writeError) { writeError in
+                switch writeError {
+                    case .authNotDetermine, .noData, .unableToCompleteRequest, .invalidValue:
+                        EmptyView()
+                    case .sharingDenied(_):
+                        Button("Settings") {
+                            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(settingsURL)
+                            }
+                        }
+                        Button("Cancel", role: .cancel) { }
+                }
+            } message: { writeError in
+                Text(writeError.failureReason)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
+                        guard let value = Double(valueToAdd) else {
+                            writeError = .invalidValue
+                            isShowingAddData = false
+                            valueToAdd = ""
+                            return
+                        }
                         Task {
                             if metric == .soundLevels {
-                                await hkManager.addSoundData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
-                                await hkManager.fetchDecibelCount()
-                                isShowingAddData = false
+                                do {
+                                    try await hkManager.addSoundData(for: addDataDate, value: value)
+                                    try await hkManager.fetchDecibelCount()
+                                    isShowingAddData = false
+                                } catch SCError.sharingDenied(let quantityType) {
+                                    print("❌ Sharing denied for \(quantityType)")
+                                    writeError = .sharingDenied(quantityType: quantityType)
+                                    isShowingAlert = true
+                                } catch {
+                                    print("❌ Data list view unable to complete request")
+                                    writeError = .unableToCompleteRequest
+                                    isShowingAlert = true
+                                }
                             } else {
-                                await hkManager.addHeadphoneData(for: addDataDate, value: Double(valueToAdd)!) //Fix Force unwrap later
-                                await hkManager.fetchHeadphoneDecibelCount()
-                                isShowingAddData = false
+                                do {
+                                    try await hkManager.addHeadphoneData(for: addDataDate, value: value)
+                                    try await hkManager.fetchHeadphoneDecibelCount()
+                                    isShowingAddData = false
+                                } catch SCError.sharingDenied(let quantityType) {
+                                    print("❌ Sharing denied for \(quantityType)")
+                                    writeError = .sharingDenied(quantityType: quantityType)
+                                    isShowingAlert = true
+                                } catch {
+                                    print("❌ Data list view unable to complete request")
+                                    writeError = .unableToCompleteRequest
+                                    isShowingAlert = true
+                                }
                             }
                         }
                     }
                 }
-                
+
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
                         isShowingAddData = false

@@ -44,10 +44,10 @@ struct DashboardView: View {
                     switch selectedStat {
                         case .soundLevels:
                             SoundChart(chartData: ChartHelper.convert(data: hkManager.environmentData))
-                            DecibelPieChart(chartData: ChartMath.averageWeekdayCount(for: hkManager.environmentData))
+                            DecibelPieChart(chartData: ChartHelper.averageWeekdayCount(for: hkManager.environmentData))
                         case .headphones:
                             HeadphoneChart(chartData: ChartHelper.convert(data: hkManager.headphonesData))
-                            HeadphoneDiffChart(chartData: ChartMath.averageDailySoundDiffs(for: hkManager.decibelDiffData))
+                            HeadphoneDiffChart(chartData: ChartHelper.averageDailySoundDiffs(for: hkManager.decibelDiffData))
                     }
                 }
             }

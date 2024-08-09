@@ -83,6 +83,6 @@ struct DecibelPieChart: View {
 }
 
 #Preview {
-    DecibelPieChart(chartData: ChartMath.averageWeekdayCount(for: MockData.EnvironmentdB))
+    DecibelPieChart(chartData: ChartHelper.averageWeekdayCount(for: MockData.EnvironmentdB))
         .padding()
 }

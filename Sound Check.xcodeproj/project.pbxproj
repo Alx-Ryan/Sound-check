@@ -27,7 +27,6 @@
 			membershipExceptions = (
 				ChartDataTypes.swift,
 				ChartHelper.swift,
-				ChartMath.swift,
 				HealthMetric.swift,
 			);
 			target = 3D7B567D2C38B63200D7FFDD /* Sound Check */;
@@ -45,12 +44,12 @@
 				FullScreenViews/DashboardView.swift,
 				FullScreenViews/HealthDataListView.swift,
 				FullScreenViews/HealthKitPermissionPrimingView.swift,
-				SubViews/Charts/ChartAnnotationView.swift,
-				SubViews/Charts/ChartContainer.swift,
-				SubViews/Charts/ChartEmptyView.swift,
 				SubViews/Charts/DecibelPieChart.swift,
 				SubViews/Charts/HeadphoneChart.swift,
 				SubViews/Charts/HeadphoneDiffChart.swift,
+				"SubViews/Charts/Helper Views/ChartAnnotationView.swift",
+				"SubViews/Charts/Helper Views/ChartContainer.swift",
+				"SubViews/Charts/Helper Views/ChartEmptyView.swift",
 				SubViews/Charts/SoundChart.swift,
 			);
 			target = 3D7B567D2C38B63200D7FFDD /* Sound Check */;

@@ -30,8 +30,6 @@ struct DashboardView: View {
     @State private var isShowingAlert = false
     @State private var fetchError: SCError = .noData
 
-    var isSound: Bool { selectedStat == .soundLevels }
-
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -54,30 +52,13 @@ struct DashboardView: View {
                 }
             }
             .padding()
-            .task {
-                    // await hkManager.addSimulatorData()
-                do {
-                    try await hkManager.fetchDecibelCount()
-                    try await hkManager.fetchHeadphoneDecibelCount()
-                    try await hkManager.fetchHeadphoneDecibelCountDiff()
-                } catch SCError.authNotDetermine {
-                    isShowingPermissionSheet = true
-                } catch SCError.noData {
-                    print("❌ No Data Error")
-                    fetchError = .noData
-                    isShowingAlert = true
-                } catch {
-                    print("❌ Unable to complete request")
-                    fetchError = .unableToCompleteRequest
-                    isShowingAlert = true
-                }
-            }
+            .task { fetchHealthData() }
             .navigationTitle("Dashboard")
             .navigationDestination(for: HealthMetricContext.self) { metric in
                 HealthDataListView(metric: metric)
             }
             .sheet(isPresented: $isShowingPermissionSheet) {
-                    // fetch health data
+                fetchHealthData()
             } content: {
                 HealthKitPermissionPrimingView()
             }
@@ -88,7 +69,31 @@ struct DashboardView: View {
             }
 
         }
-        .tint(isSound ? .pink : .indigo)
+        .tint(selectedStat == .soundLevels ? .pink : .indigo)
+    }
+
+    private func fetchHealthData() {
+        Task {
+                // await hkManager.addSimulatorData()
+            do {
+                async let DecibelCount = hkManager.fetchDecibelCount()
+                async let headphoneDecibel = hkManager.fetchHeadphoneDecibelCount(daysBack: 28)
+                async let headphoneDiff = hkManager.fetchHeadphoneDecibelCount(daysBack: 29)
+                hkManager.environmentData = try await DecibelCount
+                hkManager.headphonesData = try await headphoneDecibel
+                hkManager.decibelDiffData = try await headphoneDiff
+            } catch SCError.authNotDetermine {
+                isShowingPermissionSheet = true
+            } catch SCError.noData {
+                print("❌ No Data Error")
+                fetchError = .noData
+                isShowingAlert = true
+            } catch {
+                print("❌ Unable to complete request")
+                fetchError = .unableToCompleteRequest
+                isShowingAlert = true
+            }
+        }
     }
 }
 

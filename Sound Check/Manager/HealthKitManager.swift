@@ -9,44 +9,6 @@ import Foundation
 import HealthKitUI
 import Observation
 
-enum SCError: LocalizedError {
-    case authNotDetermine
-    case sharingDenied(quantityType: String)
-    case noData
-    case unableToCompleteRequest
-    case invalidValue
-
-    var errorDescription: String? {
-        switch self {
-            case .authNotDetermine:
-                "Need access to Health Data."
-            case .sharingDenied(_):
-                "No write access."
-            case .noData:
-                "No data."
-            case .unableToCompleteRequest:
-                "Unable to complete request."
-            case .invalidValue:
-                "Invalid Valuew"
-        }
-    }
-
-    var failureReason: String {
-        switch self {
-            case .authNotDetermine:
-                "You have not given access to your Health data. Please go to Settings > Health > Data Access & Devices."
-            case .sharingDenied(let quantityType):
-                "You have denied access to upload your \(quantityType) data. \n\nYou can change this in Settings > Health > Data Access & Devices."
-            case .noData:
-                "There is no data for the Health statistic."
-            case .unableToCompleteRequest:
-                "We are unable to complete your request at this time. \n\nPlease try again later or contact support."
-            case .invalidValue:
-                "Must be a number with a maximum of one decimal place."
-        }
-    }
-}
-
 @Observable class HealthKitManager {
 
     let store = HKHealthStore()
@@ -57,21 +19,13 @@ enum SCError: LocalizedError {
     var headphonesData: [HealthMetric] = []
     var decibelDiffData: [HealthMetric] = []
 
-    func fetchDecibelCount() async throws {
+    func fetchDecibelCount() async throws  -> [HealthMetric] {
         guard store.authorizationStatus(for: HKQuantityType(.environmentalAudioExposure)) != .notDetermined else {
             throw SCError.authNotDetermine
         }
 
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
-        guard let endDate = calendar.date(byAdding: .day, value: 1, to: today) else {
-            fatalError("Unable to calculate the end date")
-        }
-        guard let startDate = calendar.date(byAdding: .day, value: -28, to: endDate) else {
-            fatalError("Unable to calculate the start date")
-        }
-
-        let queryPredicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate)
+        let interval = createDateInterval(from: .now, daysBack: 28)
+        let queryPredicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
         let samplePredicate = HKSamplePredicate.quantitySample(
             type: HKQuantityType(.environmentalAudioExposure),
             predicate: queryPredicate
@@ -79,7 +33,7 @@ enum SCError: LocalizedError {
         let environmentQuery = HKStatisticsCollectionQueryDescriptor(
             predicate: samplePredicate,
             options: .discreteMax,
-            anchorDate: endDate,
+            anchorDate: interval.end,
             intervalComponents: .init(day: 1)
         )
 
@@ -93,6 +47,8 @@ enum SCError: LocalizedError {
                 let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
                 return HealthMetric(date: stat.startDate, value: maxValue)
             }
+
+            return environmentData
         } catch HKError.errorNoData {
             throw SCError.noData
         } catch {
@@ -100,21 +56,13 @@ enum SCError: LocalizedError {
         }
     }
 
-    func fetchHeadphoneDecibelCount() async throws {
+    func fetchHeadphoneDecibelCount(daysBack: Int) async throws -> [HealthMetric] {
         guard store.authorizationStatus(for: HKQuantityType(.headphoneAudioExposure)) != .notDetermined else {
             throw SCError.authNotDetermine
         }
 
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
-        guard let endDate = calendar.date(byAdding: .day, value: 1, to: today) else {
-            fatalError("Unable to calculate the end date")
-        }
-        guard let startDate = calendar.date(byAdding: .day, value: -28, to: endDate) else {
-            fatalError("Unable to calculate the start date")
-        }
-
-        let queryPredicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate)
+        let interval = createDateInterval(from: .now, daysBack: daysBack)
+        let queryPredicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
         let samplePredicate = HKSamplePredicate.quantitySample(
             type: HKQuantityType(.headphoneAudioExposure),
             predicate: queryPredicate
@@ -122,7 +70,7 @@ enum SCError: LocalizedError {
         let headphoneQuery = HKStatisticsCollectionQueryDescriptor(
             predicate: samplePredicate,
             options: .discreteMax,
-            anchorDate: endDate,
+            anchorDate: interval.end,
             intervalComponents: .init(day: 1)
         )
 
@@ -136,49 +84,8 @@ enum SCError: LocalizedError {
                 let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
                 return HealthMetric(date: stat.startDate, value: maxValue)
             }
-        } catch HKError.errorNoData {
-            throw SCError.noData
-        } catch {
-            throw SCError.unableToCompleteRequest
-        }
-    }
 
-    func fetchHeadphoneDecibelCountDiff() async throws {
-        guard store.authorizationStatus(for: HKQuantityType(.headphoneAudioExposure)) != .notDetermined else {
-            throw SCError.authNotDetermine
-        }
-
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
-        guard let endDate = calendar.date(byAdding: .day, value: 1, to: today) else {
-            fatalError("Unable to calculate the end date")
-        }
-        guard let startDate = calendar.date(byAdding: .day, value: -29, to: endDate) else {
-            fatalError("Unable to calculate the start date")
-        }
-
-        let queryPredicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate)
-        let samplePredicate = HKSamplePredicate.quantitySample(
-            type: HKQuantityType(.headphoneAudioExposure),
-            predicate: queryPredicate
-        )
-        let headphoneQuery = HKStatisticsCollectionQueryDescriptor(
-            predicate: samplePredicate,
-            options: .discreteMax,
-            anchorDate: endDate,
-            intervalComponents: .init(day: 1)
-        )
-
-        do {
-            let headphoneLevels = try await headphoneQuery.result(for: store)
-
-            let defaultDecibel = HKQuantity(unit: HKUnit.decibelAWeightedSoundPressureLevel(), doubleValue: 0.0)
-
-            decibelDiffData = headphoneLevels.statistics().map { stat in
-                let maxQuantity = stat.maximumQuantity() ?? defaultDecibel
-                let maxValue = maxQuantity.doubleValue(for: .decibelAWeightedSoundPressureLevel())
-                return HealthMetric(date: stat.startDate, value: maxValue)
-            }
+            return headphonesData
         } catch HKError.errorNoData {
             throw SCError.noData
         } catch {
@@ -233,6 +140,18 @@ enum SCError: LocalizedError {
         try await addAudioExposureData(for: date, value: value, typeIdentifier: .headphoneAudioExposure)
     }
     
+    private func createDateInterval(from date: Date, daysBack: Int) -> DateInterval {
+        let calendar = Calendar.current
+        let startOfEndDate = calendar.startOfDay(for: date)
+        guard let endDate = calendar.date(byAdding: .day, value: 1, to: startOfEndDate) else {
+            fatalError("Unable to calculate the end date")
+        }
+        guard let startDate = calendar.date(byAdding: .day, value: -daysBack, to: endDate) else {
+            fatalError("Unable to calculate the start date")
+        }
+        return .init(start: startDate, end: endDate)
+    }
+
 //            func addSimulatorData() async {
 //                var mockSamples: [HKQuantitySample] = []
 //        

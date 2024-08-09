@@ -66,6 +66,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				MockData.swift,
+				SCError.swift,
 			);
 			target = 3D7B567D2C38B63200D7FFDD /* Sound Check */;
 		};

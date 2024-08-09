@@ -73,43 +73,7 @@ struct HealthDataListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
-                        guard let value = Double(valueToAdd) else {
-                            writeError = .invalidValue
-                            isShowingAddData = false
-                            valueToAdd = ""
-                            return
-                        }
-                        Task {
-                            if metric == .soundLevels {
-                                do {
-                                    try await hkManager.addSoundData(for: addDataDate, value: value)
-                                    try await hkManager.fetchDecibelCount()
-                                    isShowingAddData = false
-                                } catch SCError.sharingDenied(let quantityType) {
-                                    print("❌ Sharing denied for \(quantityType)")
-                                    writeError = .sharingDenied(quantityType: quantityType)
-                                    isShowingAlert = true
-                                } catch {
-                                    print("❌ Data list view unable to complete request")
-                                    writeError = .unableToCompleteRequest
-                                    isShowingAlert = true
-                                }
-                            } else {
-                                do {
-                                    try await hkManager.addHeadphoneData(for: addDataDate, value: value)
-                                    try await hkManager.fetchHeadphoneDecibelCount()
-                                    isShowingAddData = false
-                                } catch SCError.sharingDenied(let quantityType) {
-                                    print("❌ Sharing denied for \(quantityType)")
-                                    writeError = .sharingDenied(quantityType: quantityType)
-                                    isShowingAlert = true
-                                } catch {
-                                    print("❌ Data list view unable to complete request")
-                                    writeError = .unableToCompleteRequest
-                                    isShowingAlert = true
-                                }
-                            }
-                        }
+                        addDataToHealthKit()
                     }
                 }
 
@@ -118,6 +82,39 @@ struct HealthDataListView: View {
                         isShowingAddData = false
                     }
                 }
+            }
+        }
+    }
+
+    private func addDataToHealthKit() {
+        guard let value = Double(valueToAdd) else {
+            writeError = .invalidValue
+            isShowingAddData = false
+            valueToAdd = ""
+            return
+        }
+        Task {
+            do {
+                if metric == .soundLevels {
+                    try await hkManager.addSoundData(for: addDataDate, value: value)
+                    hkManager.environmentData = try await hkManager.fetchDecibelCount()
+                } else {
+                    try await hkManager.addHeadphoneData(for: addDataDate, value: value)
+                    async let headphoneDecibel = hkManager.fetchHeadphoneDecibelCount(daysBack: 28)
+                    async let headphoneDiff = hkManager.fetchHeadphoneDecibelCount(daysBack: 29)
+
+                    hkManager.headphonesData = try await headphoneDecibel
+                    hkManager.decibelDiffData = try await headphoneDiff
+                }
+                isShowingAddData = false
+            } catch SCError.sharingDenied(let quantityType) {
+                print("❌ Sharing denied for \(quantityType)")
+                writeError = .sharingDenied(quantityType: quantityType)
+                isShowingAlert = true
+            } catch {
+                print("❌ Data list view unable to complete request")
+                writeError = .unableToCompleteRequest
+                isShowingAlert = true
             }
         }
     }

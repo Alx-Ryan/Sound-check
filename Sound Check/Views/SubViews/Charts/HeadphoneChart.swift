@@ -19,18 +19,12 @@ struct HeadphoneChart: View {
     var selectedData: DateValueChartData? {
         ChartHelper.parseSelectedData(from: chartData, in: rawSelectedDate)
     }
-    var subtitle: String {
-        let average = chartData.map { $0.value}.average
-        return "Avg: \(average.formatted(.number.precision(.fractionLength(2)))) Decibels"
+    var subtitle: Double {
+        Double(chartData.map { $0.value}.average)
     }
 
     var body: some View {
-        let config = ChartContainerConfiguration(title: "Headphone dB",
-                                                 symbol: "ear.badge.waveform",
-                                                 subTitle: subtitle,
-                                                 context: .headphones,
-                                                 isNav: true)
-        ChartContainer(config: config) {
+        ChartContainer(chartType: .headphoneLine(average: subtitle)) {
             Chart {
                 if let selectedData {
                     ChartAnnotationView(data: selectedData, context: .headphones, style: nil)

@@ -7,22 +7,21 @@
 
 import SwiftUI
 
-struct ChartContainerConfiguration {
-    let title: String
-    let symbol: String
-    let subTitle: String
-    let context: HealthMetricContext
-    let isNav: Bool
+enum ChartType {
+    case soundChart(average: Double)
+    case soundPie
+    case headphoneLine(average: Double)
+    case headphoneDiff
 }
 
 struct ChartContainer<Content: View>: View {
 
-    let config: ChartContainerConfiguration
+    let chartType: ChartType
     @ViewBuilder var content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading) {
-            if config.isNav {
+            if isNav {
                 navigationLinkView
             } else {
                 titleView
@@ -37,7 +36,7 @@ struct ChartContainer<Content: View>: View {
     }
 
     var navigationLinkView: some View {
-        NavigationLink(value: config.context) {
+        NavigationLink(value: context) {
             HStack {
                 titleView
                 Spacer()
@@ -50,19 +49,83 @@ struct ChartContainer<Content: View>: View {
 
     var titleView: some View {
         VStack(alignment: .leading) {
-            Label(config.title, systemImage: config.symbol)
+            Label(title, systemImage: symbol)
                 .font(.title3.bold())
-                .foregroundStyle(config.context == .soundLevels ? .pink : .indigo)
+                .foregroundStyle(context == .soundLevels ? .pink : .indigo)
 
-            Text(config.subTitle)
+            Text(subTitle)
                 .font(.caption)
+        }
+    }
+
+    var isNav: Bool {
+        switch chartType {
+            case .soundChart(_), .headphoneLine(_):
+                return true
+            case .soundPie, .headphoneDiff:
+                return false
+        }
+    }
+
+    var context: HealthMetricContext {
+        switch chartType {
+            case .soundChart(_), .soundPie:
+                    .soundLevels
+            case .headphoneLine(_), .headphoneDiff:
+                    .headphones
+        }
+    }
+
+    var title: String {
+        switch chartType {
+            case .soundChart(_):
+                "Environment Sound Levels"
+            case .soundPie:
+                "Sound Averages"
+            case .headphoneLine(_):
+                "Headphone dB"
+            case .headphoneDiff:
+                "Average Decibel Change"
+        }
+    }
+
+    var symbol: String {
+        switch chartType {
+            case .soundChart(_):
+                "waveform"
+            case .soundPie:
+                "chart.dots.scatter"
+            case .headphoneLine(_):
+                "ear.badge.waveform"
+            case .headphoneDiff:
+                "ear.badge.waveform"
+        }
+    }
+
+    var subTitle: String {
+        switch chartType {
+            case .soundChart(let average):
+                "Avg: \(average.formatted(.number.precision(.fractionLength(2)))) Decibels"
+            case .soundPie:
+                "Last 28 Days"
+            case .headphoneLine(let average):
+                "Avg: \(average.formatted(.number.precision(.fractionLength(2)))) Decibels, Goal: 55"
+            case .headphoneDiff:
+                "Per WeekDay (Last 28 Days)"
         }
     }
 }
 
 #Preview {
-    ChartContainer(config: .init(title: "Test", symbol: "waveform", subTitle: "Test Sub", context: .soundLevels, isNav: true)) {
-        Text("Chart here")
-            .frame(height: 150)
+    Group {
+        ChartContainer(chartType: .headphoneLine(average: 55)) {
+            Text("Chart here")
+                .frame(height: 150)
+        ChartContainer(chartType: .headphoneDiff) {
+            Text("Chart here")
+                .frame(height: 150)
+            }
+        }
     }
+    .padding()
 }

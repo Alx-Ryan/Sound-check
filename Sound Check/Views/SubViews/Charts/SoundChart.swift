@@ -21,12 +21,7 @@ struct SoundChart: View {
     }
 
     var body: some View {
-        let config = ChartContainerConfiguration(title: "Sound Levels",
-                                                 symbol: "waveform",
-                                                 subTitle: "Avg: \(averageSoundLevels.formatted(.number.precision(.fractionLength(2)))) Decibels",
-                                                 context: .soundLevels,
-                                                 isNav: true)
-        ChartContainer(config: config) {
+        ChartContainer(chartType: .soundChart(average: averageSoundLevels)) {
             Chart {
                 if let selectedData {
                     ChartAnnotationView(data: selectedData, context: .soundLevels, style: nil)

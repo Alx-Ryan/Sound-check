@@ -11,19 +11,14 @@ import Charts
 struct HeadphoneDiffChart: View {
     @State private var rawSelectedDate: Date?
     @State private var selectedDay: Date?
-    
+
     var chartData: [DateValueChartData]
     var selectedData: DateValueChartData? {
         ChartHelper.parseSelectedData(from: chartData, in: rawSelectedDate)
     }
-    
+
     var body: some View {
-        let config = ChartContainerConfiguration(title: "Average Decibel Change",
-                                                 symbol: "ear.badge.waveform",
-                                                 subTitle: "Per WeekDay (Last 28 Days)",
-                                                 context: .headphones,
-                                                 isNav: false)
-        ChartContainer(config: config) {
+        ChartContainer(chartType: .headphoneDiff) {
             Chart {
                 if let selectedData {
                     ChartAnnotationView(data: selectedData, context: .headphones, style: ((selectedData.value) <= 0 ? .indigo : .purple))

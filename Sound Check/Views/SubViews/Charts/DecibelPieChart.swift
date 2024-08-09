@@ -25,12 +25,7 @@ struct DecibelPieChart: View {
     }
 
     var body: some View {
-        let config = ChartContainerConfiguration(title: "Sound Averages",
-                                                 symbol: "chart.dots.scatter",
-                                                 subTitle: "Last 28 Days",
-                                                 context: .soundLevels,
-                                                 isNav: false)
-        ChartContainer(config: config) {
+        ChartContainer(chartType: .soundPie) {
             Chart {
                 ForEach(chartData) { weekday in
                     SectorMark(

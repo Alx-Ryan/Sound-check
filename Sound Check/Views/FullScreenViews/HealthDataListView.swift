@@ -24,11 +24,13 @@ struct HealthDataListView: View {
 
     var body: some View {
         List(listData.reversed()) { data in
-            HStack {
-                Text(data.date, format: .dateTime.month().day().year(.twoDigits))
-                Spacer()
+            LabeledContent {
                 Text(data.value, format: .number.precision(.fractionLength(metric == .soundLevels ? 0 : 1)))
+            } label: {
+                Text(data.date, format: .dateTime.month().day().year(.twoDigits))
+                    .accessibilityLabel(data.date.accessibilityDate)
             }
+            .accessibilityElement(children: .combine)
         }
         .navigationTitle(metric.title)
         .sheet(isPresented: $isShowingAddData) {
@@ -45,9 +47,7 @@ struct HealthDataListView: View {
         NavigationStack {
             Form {
                 DatePicker("Date", selection: $addDataDate, displayedComponents: .date)
-                HStack {
-                    Text(metric.title)
-                    Spacer()
+                LabeledContent(metric.title) {
                     TextField("Value", text: $valueToAdd)
                         .multilineTextAlignment(.trailing)
                         .frame(width: 140)
@@ -73,43 +73,7 @@ struct HealthDataListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
-                        guard let value = Double(valueToAdd) else {
-                            writeError = .invalidValue
-                            isShowingAddData = false
-                            valueToAdd = ""
-                            return
-                        }
-                        Task {
-                            if metric == .soundLevels {
-                                do {
-                                    try await hkManager.addSoundData(for: addDataDate, value: value)
-                                    try await hkManager.fetchDecibelCount()
-                                    isShowingAddData = false
-                                } catch SCError.sharingDenied(let quantityType) {
-                                    print("❌ Sharing denied for \(quantityType)")
-                                    writeError = .sharingDenied(quantityType: quantityType)
-                                    isShowingAlert = true
-                                } catch {
-                                    print("❌ Data list view unable to complete request")
-                                    writeError = .unableToCompleteRequest
-                                    isShowingAlert = true
-                                }
-                            } else {
-                                do {
-                                    try await hkManager.addHeadphoneData(for: addDataDate, value: value)
-                                    try await hkManager.fetchHeadphoneDecibelCount()
-                                    isShowingAddData = false
-                                } catch SCError.sharingDenied(let quantityType) {
-                                    print("❌ Sharing denied for \(quantityType)")
-                                    writeError = .sharingDenied(quantityType: quantityType)
-                                    isShowingAlert = true
-                                } catch {
-                                    print("❌ Data list view unable to complete request")
-                                    writeError = .unableToCompleteRequest
-                                    isShowingAlert = true
-                                }
-                            }
-                        }
+                        addDataToHealthKit()
                     }
                 }
 
@@ -118,6 +82,39 @@ struct HealthDataListView: View {
                         isShowingAddData = false
                     }
                 }
+            }
+        }
+    }
+
+    private func addDataToHealthKit() {
+        guard let value = Double(valueToAdd) else {
+            writeError = .invalidValue
+            isShowingAddData = false
+            valueToAdd = ""
+            return
+        }
+        Task {
+            do {
+                if metric == .soundLevels {
+                    try await hkManager.addSoundData(for: addDataDate, value: value)
+                    hkManager.environmentData = try await hkManager.fetchDecibelCount()
+                } else {
+                    try await hkManager.addHeadphoneData(for: addDataDate, value: value)
+                    async let headphoneDecibel = hkManager.fetchHeadphoneDecibelCount(daysBack: 28)
+                    async let headphoneDiff = hkManager.fetchHeadphoneDecibelCount(daysBack: 29)
+
+                    hkManager.headphonesData = try await headphoneDecibel
+                    hkManager.decibelDiffData = try await headphoneDiff
+                }
+                isShowingAddData = false
+            } catch SCError.sharingDenied(let quantityType) {
+                print("❌ Sharing denied for \(quantityType)")
+                writeError = .sharingDenied(quantityType: quantityType)
+                isShowingAlert = true
+            } catch {
+                print("❌ Data list view unable to complete request")
+                writeError = .unableToCompleteRequest
+                isShowingAlert = true
             }
         }
     }

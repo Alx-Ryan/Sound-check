@@ -18,44 +18,44 @@ struct HeadphoneDiffChart: View {
     }
 
     var body: some View {
-        let config = ChartContainerConfiguration(title: "Average Decibel Change",
-                                                 symbol: "ear.badge.waveform",
-                                                 subTitle: "Per WeekDay (Last 28 Days)",
-                                                 context: .headphones,
-                                                 isNav: false)
-        ChartContainer(config: config) {
-                if chartData.isEmpty {
-                    ChartEmptyView(systemImageName: "chart.bar", title: "No Data", description: "There is no sound data from the Health App")
-            } else {
-                Chart {
-                    if let selectedData {
-                        ChartAnnotationView(data: selectedData, context: .headphones, style: ((selectedData.value) <= 0 ? .indigo : .purple))
-                    }
-                    ForEach(chartData) { DecibelDiff in
+        ChartContainer(chartType: .headphoneDiff) {
+            Chart {
+                if let selectedData {
+                    ChartAnnotationView(data: selectedData, context: .headphones, style: ((selectedData.value) <= 0 ? .indigo : .purple))
+                }
+                ForEach(chartData) { DecibelDiff in
+                    Plot {
                         BarMark(
                             x: .value("Day", DecibelDiff.date, unit: .day),
                             y: .value("Decibel Diff", DecibelDiff.value)
                         )
                         .foregroundStyle(DecibelDiff.value <= 0 ? Color.indigo.gradient : Color.purple.gradient)
                     }
+                    .accessibilityLabel(DecibelDiff.date.accessibilityDate)
+                    .accessibilityValue("\(String(describing: Double(DecibelDiff.value.formatted(.number.precision(.fractionLength(2)).sign(strategy: .always()))))) decibels")
                 }
-                .frame(height: 150)
-                .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
-                .chartYScale(domain: .automatic(includesZero: false))
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: .day)) {
-                        AxisValueLabel(format: .dateTime.weekday(.abbreviated), centered: true)
-                        AxisValueLabel(format: .dateTime.day(), centered: true)
-                            .offset(y: 12)
-                    }
+            }
+            .frame(height: 150)
+            .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
+            .chartYScale(domain: .automatic(includesZero: false))
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .day)) {
+                    AxisValueLabel(format: .dateTime.weekday(.abbreviated), centered: true)
+                    AxisValueLabel(format: .dateTime.day(), centered: true)
+                        .offset(y: 12)
                 }
-                .chartYAxis{
-                    AxisMarks { value in
-                        AxisGridLine()
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                        
-                        AxisValueLabel()
-                    }
+            }
+            .chartYAxis{
+                AxisMarks { value in
+                    AxisGridLine()
+                        .foregroundStyle(Color.secondary.opacity(0.3))
+                    
+                    AxisValueLabel()
+                }
+            }
+            .overlay {
+                if chartData.isEmpty {
+                    ChartEmptyView(systemImageName: "chart.bar", title: "No Data", description: "There is no sound data from the Health App")
                 }
             }
         }

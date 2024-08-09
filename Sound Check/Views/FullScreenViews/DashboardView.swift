@@ -30,8 +30,6 @@ struct DashboardView: View {
     @State private var isShowingAlert = false
     @State private var fetchError: SCError = .noData
 
-    var isSound: Bool { selectedStat == .soundLevels }
-
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -46,41 +44,24 @@ struct DashboardView: View {
                     switch selectedStat {
                         case .soundLevels:
                             SoundChart(chartData: ChartHelper.convert(data: hkManager.environmentData))
-                            DecibelPieChart(chartData: ChartMath.averageWeekdayCount(for: hkManager.environmentData))
+                            DecibelPieChart(chartData: ChartHelper.averageWeekdayCount(for: hkManager.environmentData))
                         case .headphones:
                             HeadphoneChart(chartData: ChartHelper.convert(data: hkManager.headphonesData))
-                            HeadphoneDiffChart(chartData: ChartMath.averageDailySoundDiffs(for: hkManager.decibelDiffData))
+                            HeadphoneDiffChart(chartData: ChartHelper.averageDailySoundDiffs(for: hkManager.decibelDiffData))
                     }
                 }
             }
             .padding()
-            .task {
-                    // await hkManager.addSimulatorData()
-                do {
-                    try await hkManager.fetchDecibelCount()
-                    try await hkManager.fetchHeadphoneDecibelCount()
-                    try await hkManager.fetchHeadphoneDecibelCountDiff()
-                } catch SCError.authNotDetermine {
-                    isShowingPermissionSheet = true
-                } catch SCError.noData {
-                    print("❌ No Data Error")
-                    fetchError = .noData
-                    isShowingAlert = true
-                } catch {
-                    print("❌ Unable to complete request")
-                    fetchError = .unableToCompleteRequest
-                    isShowingAlert = true
-                }
-            }
+            .task { fetchHealthData() }
             .navigationTitle("Dashboard")
             .navigationDestination(for: HealthMetricContext.self) { metric in
                 HealthDataListView(metric: metric)
             }
-            .sheet(isPresented: $isShowingPermissionSheet) {
-                    // fetch health data
-            } content: {
+            .fullScreenCover(isPresented: $isShowingPermissionSheet, onDismiss: {
+                fetchHealthData()
+            }, content: {
                 HealthKitPermissionPrimingView()
-            }
+            })
             .alert(isPresented: $isShowingAlert, error: fetchError) { fetchError in
                 // action
             } message: { fetchError in
@@ -88,7 +69,31 @@ struct DashboardView: View {
             }
 
         }
-        .tint(isSound ? .pink : .indigo)
+        .tint(selectedStat == .soundLevels ? .pink : .indigo)
+    }
+
+    private func fetchHealthData() {
+        Task {
+                // await hkManager.addSimulatorData()
+            do {
+                async let DecibelCount = hkManager.fetchDecibelCount()
+                async let headphoneDecibel = hkManager.fetchHeadphoneDecibelCount(daysBack: 28)
+                async let headphoneDiff = hkManager.fetchHeadphoneDecibelCount(daysBack: 29)
+                hkManager.environmentData = try await DecibelCount
+                hkManager.headphonesData = try await headphoneDecibel
+                hkManager.decibelDiffData = try await headphoneDiff
+            } catch SCError.authNotDetermine {
+                isShowingPermissionSheet = true
+            } catch SCError.noData {
+                print("❌ No Data Error")
+                fetchError = .noData
+                isShowingAlert = true
+            } catch {
+                print("❌ Unable to complete request")
+                fetchError = .unableToCompleteRequest
+                isShowingAlert = true
+            }
+        }
     }
 }
 

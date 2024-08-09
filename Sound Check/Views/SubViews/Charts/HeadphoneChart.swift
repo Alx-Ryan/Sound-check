@@ -19,26 +19,24 @@ struct HeadphoneChart: View {
     var selectedData: DateValueChartData? {
         ChartHelper.parseSelectedData(from: chartData, in: rawSelectedDate)
     }
+    var subtitle: Double {
+        Double(chartData.map { $0.value}.average)
+    }
 
     var body: some View {
-        let config = ChartContainerConfiguration(title: "Headphone dB",
-                                                 symbol: "ear.badge.waveform",
-                                                 subTitle: "Avg: Decibels",
-                                                 context: .headphones,
-                                                 isNav: true)
-        ChartContainer(config: config) {
-                if chartData.isEmpty {
-                    ChartEmptyView(systemImageName: "chart.xyaxis.line", title: "No Data", description: "There is no sound data from the Health App")
-            } else {
-                Chart {
-                    if let selectedData {
-                        ChartAnnotationView(data: selectedData, context: .headphones, style: nil)
-                    }
+        ChartContainer(chartType: .headphoneLine(average: subtitle)) {
+            Chart {
+                if let selectedData {
+                    ChartAnnotationView(data: selectedData, context: .headphones, style: nil)
+                }
+                if !chartData.isEmpty {
                     RuleMark(y: .value("Goal", 55))
                         .foregroundStyle(.mint)
                         .lineStyle(.init(lineWidth: 1, dash: [5]))
-                    
-                    ForEach(chartData) { headphonedB in
+                        .accessibilityHidden(true)
+                }
+                ForEach(chartData) { headphonedB in
+                    Plot {
                         LineMark(
                             x: .value("Day", headphonedB.date, unit: .day),
                             y: .value("Value", headphonedB.value)
@@ -56,22 +54,29 @@ struct HeadphoneChart: View {
                         .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
                         .interpolationMethod(.cardinal)
                     }
+                    .accessibilityLabel(headphonedB.date.accessibilityDate)
+                    .accessibilityValue("\(String(describing: Double(headphonedB.value.formatted(.number.precision(.fractionLength(2)))))) decibels")
                 }
-                .frame(height: 150)
-                .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
-                .chartYScale(domain: .automatic(includesZero: false))
-                .chartXAxis{
-                    AxisMarks{
-                        AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
-                    }
+            }
+            .frame(height: 150)
+            .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
+            .chartYScale(domain: .automatic(includesZero: false))
+            .chartXAxis{
+                AxisMarks{
+                    AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
                 }
-                .chartYAxis{
-                    AxisMarks { value in
-                        AxisGridLine()
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                        
-                        AxisValueLabel()
-                    }
+            }
+            .chartYAxis{
+                AxisMarks { value in
+                    AxisGridLine()
+                        .foregroundStyle(Color.secondary.opacity(0.3))
+
+                    AxisValueLabel()
+                }
+            }
+            .overlay{
+                if chartData.isEmpty {
+                    ChartEmptyView(systemImageName: "chart.xyaxis.line", title: "No Data", description: "There is no sound data from the Health App")
                 }
             }
         }

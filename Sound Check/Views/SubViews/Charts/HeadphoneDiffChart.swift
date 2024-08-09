@@ -24,11 +24,15 @@ struct HeadphoneDiffChart: View {
                     ChartAnnotationView(data: selectedData, context: .headphones, style: ((selectedData.value) <= 0 ? .indigo : .purple))
                 }
                 ForEach(chartData) { DecibelDiff in
-                    BarMark(
-                        x: .value("Day", DecibelDiff.date, unit: .day),
-                        y: .value("Decibel Diff", DecibelDiff.value)
-                    )
-                    .foregroundStyle(DecibelDiff.value <= 0 ? Color.indigo.gradient : Color.purple.gradient)
+                    Plot {
+                        BarMark(
+                            x: .value("Day", DecibelDiff.date, unit: .day),
+                            y: .value("Decibel Diff", DecibelDiff.value)
+                        )
+                        .foregroundStyle(DecibelDiff.value <= 0 ? Color.indigo.gradient : Color.purple.gradient)
+                    }
+                    .accessibilityLabel(DecibelDiff.date.accessibilityDate)
+                    .accessibilityValue("\(String(describing: Double(DecibelDiff.value.formatted(.number.precision(.fractionLength(2)).sign(strategy: .always()))))) decibels")
                 }
             }
             .frame(height: 150)

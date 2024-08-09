@@ -45,6 +45,7 @@ struct ChartContainer<Content: View>: View {
         }
         .foregroundStyle(.secondary)
         .padding(.bottom, 12)
+        .accessibilityHint("Tap for data in list view")
     }
 
     var titleView: some View {
@@ -56,6 +57,9 @@ struct ChartContainer<Content: View>: View {
             Text(subTitle)
                 .font(.caption)
         }
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityElement(children: .ignore)
     }
 
     var isNav: Bool {
@@ -112,6 +116,19 @@ struct ChartContainer<Content: View>: View {
                 "Avg: \(average.formatted(.number.precision(.fractionLength(2)))) Decibels, Goal: 55"
             case .headphoneDiff:
                 "Per WeekDay (Last 28 Days)"
+        }
+    }
+
+    var accessibilityLabel: String {
+        switch chartType {
+            case .soundChart(let average):
+                "Line Chart, environment decibels, last 28 days, average daily decibels: \(average.formatted(.number.precision(.fractionLength(2))))"
+            case .soundPie:
+                "Pie Chart, average decibels per weekday"
+            case .headphoneLine(let average):
+                "Line Chart, headphone decibels, average decibels: \(average.formatted(.number.precision(.fractionLength(2)))), Goal: 55 Decibels"
+            case .headphoneDiff:
+                "Bar Chart, average decibel change per weekday"
         }
     }
 }

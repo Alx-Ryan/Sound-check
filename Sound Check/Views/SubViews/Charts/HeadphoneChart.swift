@@ -33,24 +33,29 @@ struct HeadphoneChart: View {
                     RuleMark(y: .value("Goal", 55))
                         .foregroundStyle(.mint)
                         .lineStyle(.init(lineWidth: 1, dash: [5]))
+                        .accessibilityHidden(true)
                 }
                 ForEach(chartData) { headphonedB in
-                    LineMark(
-                        x: .value("Day", headphonedB.date, unit: .day),
-                        y: .value("Value", headphonedB.value)
-                    )
-                    .foregroundStyle(.indigo.gradient)
-                    .interpolationMethod(.cardinal)
-                    .symbol(.circle)
-                    .symbolSize(50)
-
-                    AreaMark(
-                        x: .value("Day", headphonedB.date, unit: .day),
-                        yStart: .value("Value", headphonedB.value),
-                        yEnd: .value("Min Value", minValue - 15)
-                    )
-                    .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
-                    .interpolationMethod(.cardinal)
+                    Plot {
+                        LineMark(
+                            x: .value("Day", headphonedB.date, unit: .day),
+                            y: .value("Value", headphonedB.value)
+                        )
+                        .foregroundStyle(.indigo.gradient)
+                        .interpolationMethod(.cardinal)
+                        .symbol(.circle)
+                        .symbolSize(50)
+                        
+                        AreaMark(
+                            x: .value("Day", headphonedB.date, unit: .day),
+                            yStart: .value("Value", headphonedB.value),
+                            yEnd: .value("Min Value", minValue - 15)
+                        )
+                        .foregroundStyle(Gradient(colors: [.indigo.opacity(0.5), .clear]))
+                        .interpolationMethod(.cardinal)
+                    }
+                    .accessibilityLabel(headphonedB.date.accessibilityDate)
+                    .accessibilityValue("\(String(describing: Double(headphonedB.value.formatted(.number.precision(.fractionLength(2)))))) decibels")
                 }
             }
             .frame(height: 150)

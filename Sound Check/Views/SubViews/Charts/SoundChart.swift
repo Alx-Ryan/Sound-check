@@ -31,19 +31,24 @@ struct SoundChart: View {
                     RuleMark(y: .value("Average", averageSoundLevels))
                         .foregroundStyle(Color.secondary)
                         .lineStyle(.init(lineWidth: 1, dash: [5]))
+                        .accessibilityHidden(true)
                 }
 
                 ForEach(chartData) { decibel in
-                    PointMark(
-                        x: .value("Date", decibel.date, unit: .day),
-                        y: .value("Decibels", decibel.value)
-                    )
-                    .opacity(rawSelectedDate == nil || decibel.date == selectedData?.date ? 1.0 : 0.3)
-                    LineMark(
-                        x: .value("Date", decibel.date, unit: .day),
-                        y: .value("Decibels", decibel.value)
-                    )
-                    .opacity(0.3)
+                    Plot {
+                        PointMark(
+                            x: .value("Date", decibel.date, unit: .day),
+                            y: .value("Decibels", decibel.value)
+                        )
+                        .opacity(rawSelectedDate == nil || decibel.date == selectedData?.date ? 1.0 : 0.3)
+                        LineMark(
+                            x: .value("Date", decibel.date, unit: .day),
+                            y: .value("Decibels", decibel.value)
+                        )
+                        .opacity(0.3)
+                    }
+                    .accessibilityLabel(decibel.date.accessibilityDate)
+                    .accessibilityValue("\(String(describing: Double(decibel.value.formatted(.number.precision(.fractionLength(2)))))) decibels")
                 }
                 .foregroundStyle(Color.pink.gradient)
             }

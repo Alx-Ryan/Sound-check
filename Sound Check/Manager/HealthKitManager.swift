@@ -18,7 +18,9 @@ import Observation
     var environmentData: [HealthMetric] = []
     var headphonesData: [HealthMetric] = []
     var decibelDiffData: [HealthMetric] = []
-
+    
+        /// Fetch last 28 days of environment decibel data from HealthKit
+        /// - Returns: Array of ``HealthMetric``
     func fetchDecibelCount() async throws  -> [HealthMetric] {
         guard store.authorizationStatus(for: HKQuantityType(.environmentalAudioExposure)) != .notDetermined else {
             throw SCError.authNotDetermine
@@ -55,7 +57,10 @@ import Observation
             throw SCError.unableToCompleteRequest
         }
     }
-
+    
+        /// Fetch most recent Headphone Decibel sample on each day for specified number of days back from today.
+        /// - Parameter daysBack: Days back from today. Ex - 28 will return last 28 days.
+        /// - Returns: Array of ``HealthMetric``
     func fetchHeadphoneDecibelCount(daysBack: Int) async throws -> [HealthMetric] {
         guard store.authorizationStatus(for: HKQuantityType(.headphoneAudioExposure)) != .notDetermined else {
             throw SCError.authNotDetermine
@@ -92,7 +97,13 @@ import Observation
             throw SCError.unableToCompleteRequest
         }
     }
-
+    
+        /// Write environment decibel data to HealthKit. Requires HealthKit write permission.
+        /// - Parameters:
+        ///   - date: Date for decibel value
+        ///   - value: Decibel value
+        ///   - typeIdentifier: The ``HKQuantityTypeIdentifier`` specifies the type of HealthKit data being recorded (e.g., `environmentalAudioExposure` or `headphoneAudioExposure`).
+        /// - Note: The method requires HealthKit permissions to be granted before calling. The method also accounts for a minimum time interval of 0.001 seconds for `HKQuantityTypeIdentifierEnvironmentalAudioExposure`.
     func addAudioExposureData(for date: Date, value: Double, typeIdentifier: HKQuantityTypeIdentifier) async throws {
         let status = store.authorizationStatus(for: HKQuantityType(typeIdentifier))
         switch status {
@@ -132,14 +143,27 @@ import Observation
         }
     }
 
+        /// Saves environmental sound level data to HealthKit. Requires HealthKit write permission.
+        /// - Parameters:
+        ///   - date: The date and time at which the decibel value was recorded.
+        ///   - value: The decibel value to be saved.
     func addSoundData(for date: Date, value: Double) async throws {
         try await addAudioExposureData(for: date, value: value, typeIdentifier: .environmentalAudioExposure)
     }
 
+        /// Saves headphone sound level data to HealthKit. Requires HealthKit write permission.
+        /// - Parameters:
+        ///   - date: The date and time at which the decibel value was recorded.
+        ///   - value: The decibel value to be saved.
     func addHeadphoneData(for date: Date, value: Double) async throws {
         try await addAudioExposureData(for: date, value: value, typeIdentifier: .headphoneAudioExposure)
     }
     
+        /// Creates a dateInterval between two dates
+        /// - Parameters:
+        ///   - date: End of date interval. Ex. -today
+        ///   - daysBack: Start of date interval. Ex -28 days ago
+        /// - Returns: Date range between two dates as a DateInterval
     private func createDateInterval(from date: Date, daysBack: Int) -> DateInterval {
         let calendar = Calendar.current
         let startOfEndDate = calendar.startOfDay(for: date)

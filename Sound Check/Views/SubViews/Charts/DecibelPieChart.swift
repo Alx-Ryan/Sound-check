@@ -31,57 +31,52 @@ struct DecibelPieChart: View {
                                                  context: .soundLevels,
                                                  isNav: false)
         ChartContainer(config: config) {
-                if chartData.isEmpty {
-                    ChartEmptyView(systemImageName: "chart.pie", title: "No Data", description: "There is no sound data from the Health App")
-            } else {
-                Chart {
-                    ForEach(chartData) { weekday in
-                        SectorMark(
-                            angle: .value("Average Decibels", weekday.value),
-                            innerRadius: .ratio(0.618),
-                            outerRadius: selectedWeekday?.date.weekdayInt == weekday.date.weekdayInt ? 140 : 110,
-                            angularInset: 2
-                        )
-                        .foregroundStyle(.pink.gradient)
-                        .cornerRadius(8)
-                        .opacity(selectedWeekday?.date.weekdayInt == weekday.date.weekdayInt ? 1.0 : 0.3)
-                    }
+            Chart {
+                ForEach(chartData) { weekday in
+                    SectorMark(
+                        angle: .value("Average Decibels", weekday.value),
+                        innerRadius: .ratio(0.618),
+                        outerRadius: selectedWeekday?.date.weekdayInt == weekday.date.weekdayInt ? 140 : 110,
+                        angularInset: 2
+                    )
+                    .foregroundStyle(.pink.gradient)
+                    .cornerRadius(8)
+                    .opacity(selectedWeekday?.date.weekdayInt == weekday.date.weekdayInt ? 1.0 : 0.3)
                 }
-                .chartAngleSelection(value: $rawSelectedChartValue.animation(.easeInOut))
-                .frame(height: 240)
-                .chartBackground { proxy in
-                    GeometryReader { geo in
-                        if let plotFrame = proxy.plotFrame {
-                            let frame = geo[plotFrame]
-                            if let selectedWeekday {
-                                VStack {
-                                    Text(selectedWeekday.date.weekdayTitle)
-                                        .font(.title3.bold())
-                                        .contentTransition(.numericText())
+            }
+            .chartAngleSelection(value: $rawSelectedChartValue.animation(.easeInOut))
+            .frame(height: 240)
+            .chartBackground { proxy in
+                GeometryReader { geo in
+                    if let plotFrame = proxy.plotFrame {
+                        let frame = geo[plotFrame]
+                        if let selectedWeekday {
+                            VStack {
+                                Text(selectedWeekday.date.weekdayTitle)
+                                    .font(.title3.bold())
+                                    .contentTransition(.numericText())
 
 
-                                    Text(selectedWeekday.value, format: .number.precision(.fractionLength(0)))
-                                        .fontWeight(.medium)
-                                        .foregroundStyle(.secondary)
-                                        .contentTransition(.numericText())
-                                }
-                                .position(x: frame.midX, y: frame.midY)
+                                Text(selectedWeekday.value, format: .number.precision(.fractionLength(0)))
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(.secondary)
+                                    .contentTransition(.numericText())
                             }
+                            .position(x: frame.midX, y: frame.midY)
                         }
                     }
                 }
             }
-        }
-        .sensoryFeedback(.selection, trigger: selectedDay)
-        .onChange(of: selectedWeekday) { oldValue, newValue in
-            guard let oldValue, let newValue else { return }
-            if oldValue.date.weekdayInt != newValue.date.weekdayInt {
-                selectedDay = newValue.date
+            .overlay {
+                if chartData.isEmpty {
+                    ChartEmptyView(systemImageName: "chart.pie", title: "No Data", description: "There is no sound data from the Health App")
+                }
             }
         }
+        .sensoryFeedback(.selection, trigger: selectedDay)
         .onChange(of: rawSelectedChartValue) { oldValue, newValue in
             if newValue == nil  {
-                rawSelectedChartValue = oldValue
+                rawSelectedChartValue = oldValue ?? 0
             }
         }
     }

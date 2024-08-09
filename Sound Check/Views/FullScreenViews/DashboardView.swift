@@ -57,11 +57,11 @@ struct DashboardView: View {
             .navigationDestination(for: HealthMetricContext.self) { metric in
                 HealthDataListView(metric: metric)
             }
-            .sheet(isPresented: $isShowingPermissionSheet) {
+            .fullScreenCover(isPresented: $isShowingPermissionSheet, onDismiss: {
                 fetchHealthData()
-            } content: {
+            }, content: {
                 HealthKitPermissionPrimingView()
-            }
+            })
             .alert(isPresented: $isShowingAlert, error: fetchError) { fetchError in
                 // action
             } message: { fetchError in

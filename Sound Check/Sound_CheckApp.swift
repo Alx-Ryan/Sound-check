@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct Sound_CheckApp: App {
+
+    let hkManager = HealthKitManager()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DashboardView()
+                .environment(hkManager)
         }
     }
 }
